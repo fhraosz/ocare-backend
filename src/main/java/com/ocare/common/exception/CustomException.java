@@ -5,30 +5,57 @@ import org.springframework.http.HttpStatus;
 
 /**
  * 커스텀 예외 클래스
+ * ErrorCode 기반 예외 처리
  */
 @Getter
 public class CustomException extends RuntimeException {
 
+    private final ErrorCode errorCode;
     private final HttpStatus status;
 
-    public CustomException(String message, HttpStatus status) {
-        super(message);
-        this.status = status;
+    public CustomException(ErrorCode errorCode) {
+        super(errorCode.getMessage());
+        this.errorCode = errorCode;
+        this.status = errorCode.getStatus();
     }
 
+    public CustomException(ErrorCode errorCode, String customMessage) {
+        super(customMessage);
+        this.errorCode = errorCode;
+        this.status = errorCode.getStatus();
+    }
+
+    // 정적 팩토리 메서드 - ErrorCode 기반
+    public static CustomException of(ErrorCode errorCode) {
+        return new CustomException(errorCode);
+    }
+
+    public static CustomException of(ErrorCode errorCode, String customMessage) {
+        return new CustomException(errorCode, customMessage);
+    }
+
+    // 기존 호환성을 위한 정적 팩토리 메서드 (deprecated)
+    @Deprecated
     public static CustomException badRequest(String message) {
-        return new CustomException(message, HttpStatus.BAD_REQUEST);
+        return new CustomException(ErrorCode.INVALID_INPUT, message);
     }
 
+    @Deprecated
     public static CustomException notFound(String message) {
-        return new CustomException(message, HttpStatus.NOT_FOUND);
+        return new CustomException(ErrorCode.MEMBER_NOT_FOUND, message);
     }
 
+    @Deprecated
     public static CustomException unauthorized(String message) {
-        return new CustomException(message, HttpStatus.UNAUTHORIZED);
+        return new CustomException(ErrorCode.AUTH_UNAUTHORIZED, message);
     }
 
+    @Deprecated
     public static CustomException conflict(String message) {
-        return new CustomException(message, HttpStatus.CONFLICT);
+        return new CustomException(ErrorCode.MEMBER_EMAIL_DUPLICATE, message);
+    }
+
+    public String getCode() {
+        return errorCode.getCode();
     }
 }

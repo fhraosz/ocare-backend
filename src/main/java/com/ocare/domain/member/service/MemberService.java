@@ -1,6 +1,7 @@
 package com.ocare.domain.member.service;
 
 import com.ocare.common.exception.CustomException;
+import com.ocare.common.exception.ErrorCode;
 import com.ocare.config.jwt.JwtTokenProvider;
 import com.ocare.domain.member.dto.*;
 import com.ocare.domain.member.entity.MemberEntity;
@@ -35,13 +36,13 @@ public class MemberService {
         // 이메일 중복 검사
         if (memberRepository.existsByEmail(request.getEmail())) {
             log.error("이메일 중복: email={}", request.getEmail());
-            throw CustomException.conflict("이미 사용 중인 이메일입니다");
+            throw CustomException.of(ErrorCode.MEMBER_EMAIL_DUPLICATE);
         }
 
         // 닉네임 중복 검사
         if (memberRepository.existsByNickname(request.getNickname())) {
             log.error("닉네임 중복: nickname={}", request.getNickname());
-            throw CustomException.conflict("이미 사용 중인 닉네임입니다");
+            throw CustomException.of(ErrorCode.MEMBER_NICKNAME_DUPLICATE);
         }
 
         // 회원 생성
@@ -79,13 +80,13 @@ public class MemberService {
         MemberEntity member = memberRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> {
                     log.error("존재하지 않는 회원: email={}", request.getEmail());
-                    return CustomException.unauthorized("이메일 또는 비밀번호가 일치하지 않습니다");
+                    return CustomException.of(ErrorCode.MEMBER_PASSWORD_MISMATCH);
                 });
 
         // 비밀번호 검증
         if (!passwordEncoder.matches(request.getPassword(), member.getPassword())) {
             log.error("비밀번호 불일치: email={}", request.getEmail());
-            throw CustomException.unauthorized("이메일 또는 비밀번호가 일치하지 않습니다");
+            throw CustomException.of(ErrorCode.MEMBER_PASSWORD_MISMATCH);
         }
 
         // JWT 토큰 생성
@@ -102,7 +103,7 @@ public class MemberService {
         return memberRepository.findByEmail(email)
                 .orElseThrow(() -> {
                     log.error("존재하지 않는 회원: email={}", email);
-                    return CustomException.notFound("회원을 찾을 수 없습니다");
+                    return CustomException.of(ErrorCode.MEMBER_NOT_FOUND);
                 });
     }
 
@@ -113,7 +114,7 @@ public class MemberService {
         return memberRepository.findByRecordKey(recordKey)
                 .orElseThrow(() -> {
                     log.error("존재하지 않는 recordKey: recordKey={}", recordKey);
-                    return CustomException.notFound("회원을 찾을 수 없습니다");
+                    return CustomException.of(ErrorCode.MEMBER_NOT_FOUND);
                 });
     }
 }
