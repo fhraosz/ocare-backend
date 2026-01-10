@@ -1,0 +1,48 @@
+# Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# H2 Database
+data/
+*.db
+*.mv.db
+*.trace.db
+
+# Logs
+logs/
+*.log
+
+# Application
+application-local.yml
+application-dev.yml
+application-prod.yml
+
+# Test
+/bin/
+/out/
+
+# Compiled class files
+*.class
+
+# Package files
+*.jar
+*.war
+*.ear
+
+# Temporary files
+*.tmp
+*.bak

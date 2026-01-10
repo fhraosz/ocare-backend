@@ -1,0 +1,47 @@
+spring:
+  application:
+    name: ocare-backend
+
+  # H2 Database 설정
+  datasource:
+    url: jdbc:h2:file:./data/ocaredb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  # H2 Console 활성화 (개발용)
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+  # JPA 설정
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.H2Dialect
+
+  # Redis 설정
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+# JWT 설정
+jwt:
+  secret: ocare-health-backend-jwt-secret-key-2024-very-long-secret-key-for-security
+  expiration: 86400000  # 24시간 (밀리초)
+
+# 서버 설정
+server:
+  port: 8080
+
+# 로깅 설정
+logging:
+  level:
+    com.ocare: DEBUG
+    org.hibernate.SQL: DEBUG
