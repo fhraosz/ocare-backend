@@ -6,6 +6,7 @@ import com.ocare.domain.health.dto.HealthDataRequest;
 import com.ocare.domain.health.dto.MonthlySummaryResponse;
 import com.ocare.domain.health.service.HealthDataService;
 import com.ocare.domain.health.service.HealthQueryService;
+import com.ocare.util.ResponseUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -34,7 +35,7 @@ public class HealthController {
     public ResponseEntity<ApiResponse<Map<String, Object>>> saveHealthData(
             @RequestBody HealthDataRequest request) {
         int savedCount = healthDataService.saveHealthData(request);
-        return ResponseEntity.ok(ApiResponse.success("건강 데이터가 저장되었습니다",
+        return ResponseUtils.created(ApiResponse.success("건강 데이터가 저장되었습니다",
                 Map.of(
                         "recordKey", request.getRecordKey(),
                         "savedCount", savedCount
@@ -58,7 +59,7 @@ public class HealthController {
             summaries = healthQueryService.getDailySummaries(recordKey);
         }
 
-        return ResponseEntity.ok(ApiResponse.success(summaries));
+        return ResponseUtils.ok(ApiResponse.success(summaries));
     }
 
     /**
@@ -72,9 +73,9 @@ public class HealthController {
 
         DailySummaryResponse summary = healthQueryService.getDailySummary(recordKey, date);
         if (summary == null) {
-            return ResponseEntity.ok(ApiResponse.success("해당 날짜의 데이터가 없습니다", null));
+            return ResponseUtils.ok(ApiResponse.success("해당 날짜의 데이터가 없습니다", null));
         }
-        return ResponseEntity.ok(ApiResponse.success(summary));
+        return ResponseUtils.ok(ApiResponse.success(summary));
     }
 
     /**
@@ -93,7 +94,7 @@ public class HealthController {
             summaries = healthQueryService.getMonthlySummaries(recordKey);
         }
 
-        return ResponseEntity.ok(ApiResponse.success(summaries));
+        return ResponseUtils.ok(ApiResponse.success(summaries));
     }
 
     /**
@@ -108,8 +109,8 @@ public class HealthController {
 
         MonthlySummaryResponse summary = healthQueryService.getMonthlySummary(recordKey, year, month);
         if (summary == null) {
-            return ResponseEntity.ok(ApiResponse.success("해당 월의 데이터가 없습니다", null));
+            return ResponseUtils.ok(ApiResponse.success("해당 월의 데이터가 없습니다", null));
         }
-        return ResponseEntity.ok(ApiResponse.success(summary));
+        return ResponseUtils.ok(ApiResponse.success(summary));
     }
 }

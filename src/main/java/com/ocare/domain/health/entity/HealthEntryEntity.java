@@ -2,8 +2,6 @@ package com.ocare.domain.health.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
@@ -12,62 +10,61 @@ import java.time.LocalDateTime;
  * 삼성헬스/애플건강에서 수집된 원본 데이터 저장
  */
 @Entity
-@Table(name = "health_entries",
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Table(name = "HEALTH_ENTRY",
         uniqueConstraints = {
                 @UniqueConstraint(
                         name = "uk_health_entry",
                         columnNames = {"record_key", "period_from", "period_to"})
         },
         indexes = {
-                @Index(name = "idx_record_key", columnList = "record_key"),
-                @Index(name = "idx_period_from", columnList = "period_from")
+                @Index(name = "idx_entry_record_key", columnList = "record_key"),
+                @Index(name = "idx_entry_period_from", columnList = "period_from")
         })
-@Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-@EntityListeners(AuditingEntityListener.class)
-public class HealthEntry {
+public class HealthEntryEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // 사용자 구분 키 (UUID)
     @Column(name = "record_key", nullable = false, length = 36)
     private String recordKey;
 
-    // 측정 시작 시간
     @Column(name = "period_from", nullable = false)
     private LocalDateTime periodFrom;
 
-    // 측정 종료 시간
     @Column(name = "period_to", nullable = false)
     private LocalDateTime periodTo;
 
-    // 걸음수
-    @Column(nullable = false)
+    @Column(name = "steps", nullable = false)
     private Integer steps;
 
-    // 소모 칼로리 (kcal)
-    @Column(nullable = false)
+    @Column(name = "calories", nullable = false)
     private Float calories;
 
-    // 이동 거리 (km)
-    @Column(nullable = false)
+    @Column(name = "distance", nullable = false)
     private Float distance;
 
-    @CreatedDate
-    @Column(name = "created_at", updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @Builder
-    public HealthEntry(String recordKey, LocalDateTime periodFrom, LocalDateTime periodTo,
-                       Integer steps, Float calories, Float distance) {
-        this.recordKey = recordKey;
-        this.periodFrom = periodFrom;
-        this.periodTo = periodTo;
-        this.steps = steps;
-        this.calories = calories;
-        this.distance = distance;
+    /**
+     * 정적 팩토리 메서드
+     */
+    public static HealthEntryEntity of(String recordKey, LocalDateTime periodFrom, LocalDateTime periodTo,
+                                       Integer steps, Float calories, Float distance) {
+        return HealthEntryEntity.builder()
+                .recordKey(recordKey)
+                .periodFrom(periodFrom)
+                .periodTo(periodTo)
+                .steps(steps)
+                .calories(calories)
+                .distance(distance)
+                .createdAt(LocalDateTime.now())
+                .build();
     }
 
     /**

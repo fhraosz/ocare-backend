@@ -2,11 +2,10 @@ package com.ocare.domain.health.service;
 
 import com.ocare.domain.health.dto.DailySummaryResponse;
 import com.ocare.domain.health.dto.MonthlySummaryResponse;
-import com.ocare.domain.health.entity.DailyHealthSummary;
-import com.ocare.domain.health.entity.MonthlyHealthSummary;
 import com.ocare.domain.health.repository.DailyHealthSummaryRepository;
 import com.ocare.domain.health.repository.MonthlyHealthSummaryRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +20,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Slf4j
 public class HealthQueryService {
 
     private final DailyHealthSummaryRepository dailySummaryRepository;
@@ -30,9 +30,10 @@ public class HealthQueryService {
      * 일별 집계 데이터 조회 (전체)
      */
     public List<DailySummaryResponse> getDailySummaries(String recordKey) {
+        log.debug("일별 집계 조회: recordKey={}", recordKey);
         return dailySummaryRepository.findByRecordKeyOrderBySummaryDateAsc(recordKey)
                 .stream()
-                .map(DailySummaryResponse::from)
+                .map(DailySummaryResponse::of)
                 .collect(Collectors.toList());
     }
 
@@ -42,10 +43,11 @@ public class HealthQueryService {
     public List<DailySummaryResponse> getDailySummaries(String recordKey,
                                                          LocalDate startDate,
                                                          LocalDate endDate) {
+        log.debug("일별 집계 조회: recordKey={}, startDate={}, endDate={}", recordKey, startDate, endDate);
         return dailySummaryRepository
                 .findByRecordKeyAndSummaryDateBetweenOrderBySummaryDateAsc(recordKey, startDate, endDate)
                 .stream()
-                .map(DailySummaryResponse::from)
+                .map(DailySummaryResponse::of)
                 .collect(Collectors.toList());
     }
 
@@ -53,9 +55,10 @@ public class HealthQueryService {
      * 월별 집계 데이터 조회 (전체)
      */
     public List<MonthlySummaryResponse> getMonthlySummaries(String recordKey) {
+        log.debug("월별 집계 조회: recordKey={}", recordKey);
         return monthlySummaryRepository.findByRecordKeyOrderBySummaryYearAscSummaryMonthAsc(recordKey)
                 .stream()
-                .map(MonthlySummaryResponse::from)
+                .map(MonthlySummaryResponse::of)
                 .collect(Collectors.toList());
     }
 
@@ -63,9 +66,10 @@ public class HealthQueryService {
      * 월별 집계 데이터 조회 (특정 연도)
      */
     public List<MonthlySummaryResponse> getMonthlySummaries(String recordKey, Integer year) {
+        log.debug("월별 집계 조회: recordKey={}, year={}", recordKey, year);
         return monthlySummaryRepository.findByRecordKeyAndSummaryYearOrderBySummaryMonthAsc(recordKey, year)
                 .stream()
-                .map(MonthlySummaryResponse::from)
+                .map(MonthlySummaryResponse::of)
                 .collect(Collectors.toList());
     }
 
@@ -73,9 +77,10 @@ public class HealthQueryService {
      * 특정 월 집계 데이터 조회
      */
     public MonthlySummaryResponse getMonthlySummary(String recordKey, Integer year, Integer month) {
+        log.debug("특정 월 집계 조회: recordKey={}, year={}, month={}", recordKey, year, month);
         return monthlySummaryRepository
                 .findByRecordKeyAndSummaryYearAndSummaryMonth(recordKey, year, month)
-                .map(MonthlySummaryResponse::from)
+                .map(MonthlySummaryResponse::of)
                 .orElse(null);
     }
 
@@ -83,9 +88,10 @@ public class HealthQueryService {
      * 특정 일 집계 데이터 조회
      */
     public DailySummaryResponse getDailySummary(String recordKey, LocalDate date) {
+        log.debug("특정 일 집계 조회: recordKey={}, date={}", recordKey, date);
         return dailySummaryRepository
                 .findByRecordKeyAndSummaryDate(recordKey, date)
-                .map(DailySummaryResponse::from)
+                .map(DailySummaryResponse::of)
                 .orElse(null);
     }
 }

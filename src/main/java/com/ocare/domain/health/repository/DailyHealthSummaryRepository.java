@@ -1,6 +1,6 @@
 package com.ocare.domain.health.repository;
 
-import com.ocare.domain.health.entity.DailyHealthSummary;
+import com.ocare.domain.health.entity.DailyHealthSummaryEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -12,21 +12,12 @@ import java.util.Optional;
  * 일별 건강 데이터 집계 Repository
  */
 @Repository
-public interface DailyHealthSummaryRepository extends JpaRepository<DailyHealthSummary, Long> {
+public interface DailyHealthSummaryRepository extends JpaRepository<DailyHealthSummaryEntity, Long> {
 
-    /**
-     * recordKey와 날짜로 일별 집계 조회
-     */
-    Optional<DailyHealthSummary> findByRecordKeyAndSummaryDate(String recordKey, LocalDate summaryDate);
+    Optional<DailyHealthSummaryEntity> findByRecordKeyAndSummaryDate(String recordKey, LocalDate summaryDate);
 
-    /**
-     * recordKey로 모든 일별 집계 조회
-     */
-    List<DailyHealthSummary> findByRecordKeyOrderBySummaryDateAsc(String recordKey);
+    List<DailyHealthSummaryEntity> findByRecordKeyOrderBySummaryDateAsc(String recordKey);
 
-    /**
-     * recordKey와 기간으로 일별 집계 조회
-     */
-    List<DailyHealthSummary> findByRecordKeyAndSummaryDateBetweenOrderBySummaryDateAsc(
+    List<DailyHealthSummaryEntity> findByRecordKeyAndSummaryDateBetweenOrderBySummaryDateAsc(
             String recordKey, LocalDate startDate, LocalDate endDate);
 }

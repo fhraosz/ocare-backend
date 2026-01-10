@@ -1,6 +1,6 @@
 package com.ocare.domain.member.dto;
 
-import com.ocare.domain.member.entity.Member;
+import com.ocare.domain.member.entity.MemberEntity;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -20,14 +20,17 @@ public class MemberResponse {
     private String recordKey;
     private LocalDateTime createdAt;
 
-    public static MemberResponse from(Member member) {
+    /**
+     * Entity -> DTO 변환
+     */
+    public static MemberResponse of(MemberEntity entity) {
         return MemberResponse.builder()
-                .id(member.getId())
-                .name(member.getName())
-                .nickname(member.getNickname())
-                .email(member.getEmail())
-                .recordKey(member.getRecordKey())
-                .createdAt(member.getCreatedAt())
+                .id(entity.getId())
+                .name(entity.getName())
+                .nickname(entity.getNickname())
+                .email(entity.getEmail())
+                .recordKey(entity.getRecordKey())
+                .createdAt(entity.getCreatedAt())
                 .build();
     }
 }

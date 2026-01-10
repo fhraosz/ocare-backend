@@ -1,7 +1,7 @@
 package com.ocare.domain.health.service;
 
 import com.ocare.domain.health.dto.HealthDataRequest;
-import com.ocare.domain.health.entity.HealthEntry;
+import com.ocare.domain.health.entity.HealthEntryEntity;
 import com.ocare.domain.health.repository.HealthEntryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +28,6 @@ public class HealthDataService {
     private final HealthEntryRepository healthEntryRepository;
     private final HealthAggregationService aggregationService;
 
-    // 지원하는 날짜 형식들
     private static final DateTimeFormatter[] DATE_FORMATTERS = {
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"),
             DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssZ"),
@@ -38,7 +37,6 @@ public class HealthDataService {
 
     /**
      * JSON 데이터 저장
-     * 중복 데이터는 업데이트 처리
      */
     public int saveHealthData(HealthDataRequest request) {
         String recordKey = request.getRecordKey();
@@ -49,8 +47,10 @@ public class HealthDataService {
             return 0;
         }
 
+        log.debug("건강 데이터 저장 시작: recordKey={}, entryCount={}", recordKey, entries.size());
+
         int savedCount = 0;
-        List<HealthEntry> entriesToSave = new ArrayList<>();
+        List<HealthEntryEntity> entriesToSave = new ArrayList<>();
 
         for (HealthDataRequest.EntryDto entry : entries) {
             try {
@@ -60,24 +60,15 @@ public class HealthDataService {
                 Float calories = entry.getCalories().getValueAsFloat();
                 Float distance = entry.getDistance().getValueAsFloat();
 
-                // 기존 데이터 확인 (중복 검사)
-                Optional<HealthEntry> existingEntry = healthEntryRepository
+                Optional<HealthEntryEntity> existingEntry = healthEntryRepository
                         .findByRecordKeyAndPeriodFromAndPeriodTo(recordKey, periodFrom, periodTo);
 
                 if (existingEntry.isPresent()) {
-                    // 기존 데이터 업데이트
                     existingEntry.get().update(steps, calories, distance);
                     entriesToSave.add(existingEntry.get());
                 } else {
-                    // 새 데이터 생성
-                    HealthEntry healthEntry = HealthEntry.builder()
-                            .recordKey(recordKey)
-                            .periodFrom(periodFrom)
-                            .periodTo(periodTo)
-                            .steps(steps)
-                            .calories(calories)
-                            .distance(distance)
-                            .build();
+                    HealthEntryEntity healthEntry = HealthEntryEntity.of(
+                            recordKey, periodFrom, periodTo, steps, calories, distance);
                     entriesToSave.add(healthEntry);
                 }
                 savedCount++;
@@ -87,11 +78,9 @@ public class HealthDataService {
             }
         }
 
-        // 배치 저장
         healthEntryRepository.saveAll(entriesToSave);
-        log.info("Saved {} entries for recordKey: {}", savedCount, recordKey);
+        log.info("건강 데이터 저장 완료: recordKey={}, savedCount={}", recordKey, savedCount);
 
-        // 집계 데이터 갱신
         aggregationService.updateAggregations(recordKey);
 
         return savedCount;
@@ -105,12 +94,10 @@ public class HealthDataService {
             throw new IllegalArgumentException("DateTime string is empty");
         }
 
-        // +0000 형식 처리
         if (dateTimeStr.contains("+") && !dateTimeStr.contains("T")) {
             dateTimeStr = dateTimeStr.replace(" ", "T");
         }
 
-        // +0000 -> +00:00 변환
         if (dateTimeStr.matches(".*\\+\\d{4}$")) {
             dateTimeStr = dateTimeStr.substring(0, dateTimeStr.length() - 2) + ":" +
                     dateTimeStr.substring(dateTimeStr.length() - 2);
@@ -124,7 +111,6 @@ public class HealthDataService {
             }
         }
 
-        // ISO_OFFSET_DATE_TIME으로 시도
         try {
             return LocalDateTime.parse(dateTimeStr.substring(0, 19),
                     DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"));
@@ -132,7 +118,6 @@ public class HealthDataService {
             // ignore
         }
 
-        // 마지막 시도: 기본 형식
         try {
             return LocalDateTime.parse(dateTimeStr.replace("T", " ").substring(0, 19),
                     DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));

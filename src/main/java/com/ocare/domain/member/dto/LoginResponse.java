@@ -14,6 +14,9 @@ public class LoginResponse {
     private String tokenType;
     private MemberResponse member;
 
+    /**
+     * 정적 팩토리 메서드
+     */
     public static LoginResponse of(String accessToken, MemberResponse member) {
         return LoginResponse.builder()
                 .accessToken(accessToken)

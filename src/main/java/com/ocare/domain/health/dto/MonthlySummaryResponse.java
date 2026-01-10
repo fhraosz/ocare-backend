@@ -1,6 +1,6 @@
 package com.ocare.domain.health.dto;
 
-import com.ocare.domain.health.entity.MonthlyHealthSummary;
+import com.ocare.domain.health.entity.MonthlyHealthSummaryEntity;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -14,20 +14,23 @@ public class MonthlySummaryResponse {
     private String recordKey;
     private Integer year;
     private Integer month;
-    private String yearMonth;  // "2024-11" 형식
+    private String yearMonth;
     private Integer steps;
     private Float calories;
     private Float distance;
 
-    public static MonthlySummaryResponse from(MonthlyHealthSummary summary) {
+    /**
+     * Entity -> DTO 변환
+     */
+    public static MonthlySummaryResponse of(MonthlyHealthSummaryEntity entity) {
         return MonthlySummaryResponse.builder()
-                .recordKey(summary.getRecordKey())
-                .year(summary.getSummaryYear())
-                .month(summary.getSummaryMonth())
-                .yearMonth(String.format("%d-%02d", summary.getSummaryYear(), summary.getSummaryMonth()))
-                .steps(summary.getTotalSteps())
-                .calories(summary.getTotalCalories())
-                .distance(summary.getTotalDistance())
+                .recordKey(entity.getRecordKey())
+                .year(entity.getSummaryYear())
+                .month(entity.getSummaryMonth())
+                .yearMonth(String.format("%d-%02d", entity.getSummaryYear(), entity.getSummaryMonth()))
+                .steps(entity.getTotalSteps())
+                .calories(entity.getTotalCalories())
+                .distance(entity.getTotalDistance())
                 .build();
     }
 }

@@ -1,6 +1,6 @@
 package com.ocare.domain.health.dto;
 
-import com.ocare.domain.health.entity.DailyHealthSummary;
+import com.ocare.domain.health.entity.DailyHealthSummaryEntity;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -19,13 +19,16 @@ public class DailySummaryResponse {
     private Float calories;
     private Float distance;
 
-    public static DailySummaryResponse from(DailyHealthSummary summary) {
+    /**
+     * Entity -> DTO 변환
+     */
+    public static DailySummaryResponse of(DailyHealthSummaryEntity entity) {
         return DailySummaryResponse.builder()
-                .recordKey(summary.getRecordKey())
-                .date(summary.getSummaryDate())
-                .steps(summary.getTotalSteps())
-                .calories(summary.getTotalCalories())
-                .distance(summary.getTotalDistance())
+                .recordKey(entity.getRecordKey())
+                .date(entity.getSummaryDate())
+                .steps(entity.getTotalSteps())
+                .calories(entity.getTotalCalories())
+                .distance(entity.getTotalDistance())
                 .build();
     }
 }

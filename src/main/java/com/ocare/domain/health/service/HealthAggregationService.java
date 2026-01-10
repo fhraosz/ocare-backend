@@ -1,8 +1,8 @@
 package com.ocare.domain.health.service;
 
-import com.ocare.domain.health.entity.DailyHealthSummary;
-import com.ocare.domain.health.entity.HealthEntry;
-import com.ocare.domain.health.entity.MonthlyHealthSummary;
+import com.ocare.domain.health.entity.DailyHealthSummaryEntity;
+import com.ocare.domain.health.entity.HealthEntryEntity;
+import com.ocare.domain.health.entity.MonthlyHealthSummaryEntity;
 import com.ocare.domain.health.repository.DailyHealthSummaryRepository;
 import com.ocare.domain.health.repository.HealthEntryRepository;
 import com.ocare.domain.health.repository.MonthlyHealthSummaryRepository;
@@ -35,29 +35,27 @@ public class HealthAggregationService {
      * 특정 recordKey의 모든 집계 데이터 갱신
      */
     public void updateAggregations(String recordKey) {
-        List<HealthEntry> entries = healthEntryRepository.findByRecordKey(recordKey);
+        List<HealthEntryEntity> entries = healthEntryRepository.findByRecordKey(recordKey);
 
         if (entries.isEmpty()) {
             log.info("No entries found for recordKey: {}", recordKey);
             return;
         }
 
-        // 일별 집계 계산
+        log.debug("집계 시작: recordKey={}, entryCount={}", recordKey, entries.size());
+
         Map<LocalDate, DailyAggregation> dailyMap = new HashMap<>();
-        // 월별 집계 계산
         Map<String, MonthlyAggregation> monthlyMap = new HashMap<>();
 
-        for (HealthEntry entry : entries) {
+        for (HealthEntryEntity entry : entries) {
             LocalDate date = entry.getPeriodFrom().toLocalDate();
             int year = date.getYear();
             int month = date.getMonthValue();
             String monthKey = year + "-" + month;
 
-            // 일별 집계
             dailyMap.computeIfAbsent(date, k -> new DailyAggregation())
                     .add(entry.getSteps(), entry.getCalories(), entry.getDistance());
 
-            // 월별 집계
             monthlyMap.computeIfAbsent(monthKey, k -> new MonthlyAggregation(year, month))
                     .add(entry.getSteps(), entry.getCalories(), entry.getDistance());
         }
@@ -67,19 +65,14 @@ public class HealthAggregationService {
             LocalDate date = entry.getKey();
             DailyAggregation agg = entry.getValue();
 
-            Optional<DailyHealthSummary> existing = dailySummaryRepository
+            Optional<DailyHealthSummaryEntity> existing = dailySummaryRepository
                     .findByRecordKeyAndSummaryDate(recordKey, date);
 
             if (existing.isPresent()) {
                 existing.get().updateSummary(agg.steps, agg.calories, agg.distance);
             } else {
-                DailyHealthSummary summary = DailyHealthSummary.builder()
-                        .recordKey(recordKey)
-                        .summaryDate(date)
-                        .totalSteps(agg.steps)
-                        .totalCalories(agg.calories)
-                        .totalDistance(agg.distance)
-                        .build();
+                DailyHealthSummaryEntity summary = DailyHealthSummaryEntity.of(
+                        recordKey, date, agg.steps, agg.calories, agg.distance);
                 dailySummaryRepository.save(summary);
             }
         }
@@ -88,29 +81,22 @@ public class HealthAggregationService {
         for (Map.Entry<String, MonthlyAggregation> entry : monthlyMap.entrySet()) {
             MonthlyAggregation agg = entry.getValue();
 
-            Optional<MonthlyHealthSummary> existing = monthlySummaryRepository
+            Optional<MonthlyHealthSummaryEntity> existing = monthlySummaryRepository
                     .findByRecordKeyAndSummaryYearAndSummaryMonth(recordKey, agg.year, agg.month);
 
             if (existing.isPresent()) {
                 existing.get().updateSummary(agg.steps, agg.calories, agg.distance);
             } else {
-                MonthlyHealthSummary summary = MonthlyHealthSummary.builder()
-                        .recordKey(recordKey)
-                        .summaryYear(agg.year)
-                        .summaryMonth(agg.month)
-                        .totalSteps(agg.steps)
-                        .totalCalories(agg.calories)
-                        .totalDistance(agg.distance)
-                        .build();
+                MonthlyHealthSummaryEntity summary = MonthlyHealthSummaryEntity.of(
+                        recordKey, agg.year, agg.month, agg.steps, agg.calories, agg.distance);
                 monthlySummaryRepository.save(summary);
             }
         }
 
-        log.info("Updated aggregations for recordKey: {} - {} daily, {} monthly",
+        log.info("집계 완료: recordKey={}, daily={}, monthly={}",
                 recordKey, dailyMap.size(), monthlyMap.size());
     }
 
-    // 내부 집계용 클래스
     private static class DailyAggregation {
         int steps = 0;
         float calories = 0f;
