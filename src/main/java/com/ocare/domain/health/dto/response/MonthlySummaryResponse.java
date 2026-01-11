@@ -1,14 +1,15 @@
-package com.ocare.domain.health.dto;
+package com.ocare.domain.health.dto.response;
 
 import com.ocare.domain.health.entity.MonthlyHealthSummaryEntity;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-/**
- * 월별 집계 응답 DTO
- */
 @Getter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class MonthlySummaryResponse {
 
     private String recordKey;
@@ -19,9 +20,6 @@ public class MonthlySummaryResponse {
     private Float calories;
     private Float distance;
 
-    /**
-     * Entity -> DTO 변환
-     */
     public static MonthlySummaryResponse of(MonthlyHealthSummaryEntity entity) {
         return MonthlySummaryResponse.builder()
                 .recordKey(entity.getRecordKey())

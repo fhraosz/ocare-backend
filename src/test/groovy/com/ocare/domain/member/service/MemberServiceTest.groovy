@@ -3,10 +3,10 @@ package com.ocare.domain.member.service
 import com.ocare.common.exception.CustomException
 import com.ocare.common.exception.ErrorCode
 import com.ocare.config.jwt.JwtTokenProvider
-import com.ocare.domain.member.dto.LoginRequest
-import com.ocare.domain.member.dto.LoginResponse
-import com.ocare.domain.member.dto.MemberResponse
-import com.ocare.domain.member.dto.SignUpRequest
+import com.ocare.domain.member.dto.request.LoginRequest
+import com.ocare.domain.member.dto.request.SignUpRequest
+import com.ocare.domain.member.dto.response.LoginResponse
+import com.ocare.domain.member.dto.response.MemberResponse
 import com.ocare.domain.member.entity.MemberEntity
 import com.ocare.domain.member.repository.MemberRepository
 import org.springframework.security.crypto.password.PasswordEncoder

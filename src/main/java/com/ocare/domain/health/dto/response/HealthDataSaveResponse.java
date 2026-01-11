@@ -1,14 +1,12 @@
-package com.ocare.domain.health.dto;
+package com.ocare.domain.health.dto.response;
 
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-/**
- * 건강 데이터 저장 응답 DTO
- */
 @Getter
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@NoArgsConstructor
+@AllArgsConstructor
 public class HealthDataSaveResponse {
 
     private String recordKey;

@@ -6,10 +6,6 @@ import lombok.*;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-/**
- * 회원 엔티티
- * 사용자 정보 및 건강 데이터 연동 키 관리
- */
 @Entity
 @Getter
 @NoArgsConstructor
@@ -43,9 +39,6 @@ public class MemberEntity {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    /**
-     * 정적 팩토리 메서드 - 새 회원 생성 (recordKey 자동 생성)
-     */
     public static MemberEntity of(String name, String nickname, String email, String password) {
         LocalDateTime now = LocalDateTime.now();
         return MemberEntity.builder()
@@ -59,9 +52,6 @@ public class MemberEntity {
                 .build();
     }
 
-    /**
-     * 정적 팩토리 메서드 - 기존 recordKey 연동 회원 생성
-     */
     public static MemberEntity of(String name, String nickname, String email, String password, String recordKey) {
         LocalDateTime now = LocalDateTime.now();
         return MemberEntity.builder()

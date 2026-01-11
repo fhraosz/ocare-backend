@@ -5,10 +5,6 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
-/**
- * 건강 데이터 원본 엔티티 (10분 단위)
- * 삼성헬스/애플건강에서 수집된 원본 데이터 저장
- */
 @Entity
 @Getter
 @NoArgsConstructor
@@ -51,9 +47,6 @@ public class HealthEntryEntity {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    /**
-     * 정적 팩토리 메서드
-     */
     public static HealthEntryEntity of(String recordKey, LocalDateTime periodFrom, LocalDateTime periodTo,
                                        Integer steps, Float calories, Float distance) {
         return HealthEntryEntity.builder()
@@ -67,9 +60,6 @@ public class HealthEntryEntity {
                 .build();
     }
 
-    /**
-     * 데이터 업데이트 (중복 시 갱신용)
-     */
     public void update(Integer steps, Float calories, Float distance) {
         this.steps = steps;
         this.calories = calories;

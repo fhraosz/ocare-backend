@@ -1,15 +1,12 @@
 package com.ocare.domain.health.entity;
 
+import com.ocare.domain.health.dto.DailyAggregation;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-/**
- * 일별 건강 데이터 집계 엔티티
- * 과제 요구사항의 Daily 집계 테이블
- */
 @Entity
 @Getter
 @NoArgsConstructor
@@ -52,30 +49,23 @@ public class DailyHealthSummaryEntity {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    /**
-     * 정적 팩토리 메서드
-     */
-    public static DailyHealthSummaryEntity of(String recordKey, LocalDate summaryDate,
-                                               Integer totalSteps, Float totalCalories, Float totalDistance) {
+    public static DailyHealthSummaryEntity of(String recordKey, LocalDate summaryDate, DailyAggregation agg) {
         LocalDateTime now = LocalDateTime.now();
         return DailyHealthSummaryEntity.builder()
                 .recordKey(recordKey)
                 .summaryDate(summaryDate)
-                .totalSteps(totalSteps)
-                .totalCalories(totalCalories)
-                .totalDistance(totalDistance)
+                .totalSteps(agg.getSteps())
+                .totalCalories(agg.getCalories())
+                .totalDistance(agg.getDistance())
                 .createdAt(now)
                 .updatedAt(now)
                 .build();
     }
 
-    /**
-     * 집계 데이터 갱신
-     */
-    public void updateSummary(Integer totalSteps, Float totalCalories, Float totalDistance) {
-        this.totalSteps = totalSteps;
-        this.totalCalories = totalCalories;
-        this.totalDistance = totalDistance;
+    public void updateSummary(DailyAggregation agg) {
+        this.totalSteps = agg.getSteps();
+        this.totalCalories = agg.getCalories();
+        this.totalDistance = agg.getDistance();
         this.updatedAt = LocalDateTime.now();
     }
 }

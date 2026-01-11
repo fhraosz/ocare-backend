@@ -3,10 +3,6 @@ package com.ocare.common.exception;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
-/**
- * 커스텀 예외 클래스
- * ErrorCode 기반 예외 처리
- */
 @Getter
 public class CustomException extends RuntimeException {
 
@@ -25,7 +21,6 @@ public class CustomException extends RuntimeException {
         this.status = errorCode.getStatus();
     }
 
-    // 정적 팩토리 메서드 - ErrorCode 기반
     public static CustomException of(ErrorCode errorCode) {
         return new CustomException(errorCode);
     }
@@ -34,7 +29,6 @@ public class CustomException extends RuntimeException {
         return new CustomException(errorCode, customMessage);
     }
 
-    // 기존 호환성을 위한 정적 팩토리 메서드 (deprecated)
     @Deprecated
     public static CustomException badRequest(String message) {
         return new CustomException(ErrorCode.INVALID_INPUT, message);

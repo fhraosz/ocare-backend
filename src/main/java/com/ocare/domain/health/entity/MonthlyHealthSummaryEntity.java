@@ -1,14 +1,11 @@
 package com.ocare.domain.health.entity;
 
+import com.ocare.domain.health.dto.MonthlyAggregation;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
 
-/**
- * 월별 건강 데이터 집계 엔티티
- * 과제 요구사항의 Monthly 집계 테이블
- */
 @Entity
 @Getter
 @NoArgsConstructor
@@ -54,31 +51,24 @@ public class MonthlyHealthSummaryEntity {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    /**
-     * 정적 팩토리 메서드
-     */
-    public static MonthlyHealthSummaryEntity of(String recordKey, Integer summaryYear, Integer summaryMonth,
-                                                 Integer totalSteps, Float totalCalories, Float totalDistance) {
+    public static MonthlyHealthSummaryEntity of(String recordKey, MonthlyAggregation agg) {
         LocalDateTime now = LocalDateTime.now();
         return MonthlyHealthSummaryEntity.builder()
                 .recordKey(recordKey)
-                .summaryYear(summaryYear)
-                .summaryMonth(summaryMonth)
-                .totalSteps(totalSteps)
-                .totalCalories(totalCalories)
-                .totalDistance(totalDistance)
+                .summaryYear(agg.getYear())
+                .summaryMonth(agg.getMonth())
+                .totalSteps(agg.getSteps())
+                .totalCalories(agg.getCalories())
+                .totalDistance(agg.getDistance())
                 .createdAt(now)
                 .updatedAt(now)
                 .build();
     }
 
-    /**
-     * 집계 데이터 갱신
-     */
-    public void updateSummary(Integer totalSteps, Float totalCalories, Float totalDistance) {
-        this.totalSteps = totalSteps;
-        this.totalCalories = totalCalories;
-        this.totalDistance = totalDistance;
+    public void updateSummary(MonthlyAggregation agg) {
+        this.totalSteps = agg.getSteps();
+        this.totalCalories = agg.getCalories();
+        this.totalDistance = agg.getDistance();
         this.updatedAt = LocalDateTime.now();
     }
 }

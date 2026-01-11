@@ -1,16 +1,17 @@
-package com.ocare.domain.health.dto;
+package com.ocare.domain.health.dto.response;
 
 import com.ocare.domain.health.entity.DailyHealthSummaryEntity;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
-/**
- * 일별 집계 응답 DTO
- */
 @Getter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class DailySummaryResponse {
 
     private String recordKey;
@@ -19,9 +20,6 @@ public class DailySummaryResponse {
     private Float calories;
     private Float distance;
 
-    /**
-     * Entity -> DTO 변환
-     */
     public static DailySummaryResponse of(DailyHealthSummaryEntity entity) {
         return DailySummaryResponse.builder()
                 .recordKey(entity.getRecordKey())

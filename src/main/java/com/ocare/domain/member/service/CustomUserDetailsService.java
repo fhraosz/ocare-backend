@@ -14,10 +14,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.util.Collections;
 
-/**
- * Spring Security UserDetailsService 구현
- * JWT 인증 시 사용자 정보 로드
- */
 @Service
 @RequiredArgsConstructor
 @Slf4j

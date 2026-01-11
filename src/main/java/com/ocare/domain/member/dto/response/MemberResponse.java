@@ -1,16 +1,17 @@
-package com.ocare.domain.member.dto;
+package com.ocare.domain.member.dto.response;
 
 import com.ocare.domain.member.entity.MemberEntity;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-/**
- * 회원 정보 응답 DTO
- */
 @Getter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class MemberResponse {
 
     private Long id;
@@ -20,9 +21,6 @@ public class MemberResponse {
     private String recordKey;
     private LocalDateTime createdAt;
 
-    /**
-     * Entity -> DTO 변환
-     */
     public static MemberResponse of(MemberEntity entity) {
         return MemberResponse.builder()
                 .id(entity.getId())

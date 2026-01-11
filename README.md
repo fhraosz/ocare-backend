@@ -11,6 +11,7 @@
 - Thymeleaf + Bootstrap 5
 - H2 Database (Embedded)
 - Embedded Redis
+- Spock Framework (테스트)
 
 ## 실행 방법
 
@@ -120,28 +121,56 @@ done
 
 ```
 src/main/java/com/ocare/
-├── config/                    # 설정 클래스
+├── common/
+│   ├── exception/              # 예외 처리 (CustomException, ErrorCode)
+│   ├── response/               # 공통 응답 (ApiResponse)
+│   └── util/                   # 유틸리티 (DateTimeUtil, ResponseUtil)
+├── config/
 │   ├── SecurityConfig.java
-│   └── jwt/
+│   └── jwt/                    # JWT 설정
 ├── domain/
-│   ├── member/                # 회원 도메인
-│   └── health/                # 건강 데이터 도메인
-├── web/
-│   └── PageController.java    # 페이지 컨트롤러
-└── common/                    # 공통 클래스
+│   ├── member/                 # 회원 도메인
+│   │   ├── controller/
+│   │   ├── dto/
+│   │   │   ├── request/        # 요청 DTO (SignUpRequest, LoginRequest)
+│   │   │   └── response/       # 응답 DTO (MemberResponse, LoginResponse)
+│   │   ├── entity/
+│   │   ├── repository/
+│   │   └── service/
+│   └── health/                 # 건강 데이터 도메인
+│       ├── controller/
+│       ├── dto/
+│       │   ├── request/        # 요청 DTO (HealthDataRequest 등)
+│       │   └── response/       # 응답 DTO (DailySummaryResponse 등)
+│       ├── entity/
+│       ├── repository/
+│       └── service/
+└── web/
+    └── PageController.java     # 페이지 컨트롤러
 
 src/main/resources/
-├── templates/                 # Thymeleaf 템플릿
+├── templates/                  # Thymeleaf 템플릿
 │   ├── auth/
 │   │   ├── login.html
 │   │   └── signup.html
 │   └── dashboard/
 │       └── index.html
-├── static/                    # 정적 리소스
+├── static/                     # 정적 리소스
 │   ├── css/
 │   └── js/
 └── application.yml
 ```
+
+## 코딩 스타일
+
+프로젝트 코딩 스타일 가이드는 [CODING_STYLE.md](./CODING_STYLE.md)를 참조하세요.
+
+### 주요 규칙
+
+- **Entity**: `*Entity` suffix 사용 (예: `MemberEntity`)
+- **DTO**: request/response 패키지로 분리, 파일당 하나의 클래스
+- **Service**: 메서드 분리, Javadoc 주석 필수
+- **정적 팩토리 메서드**: Entity, Response DTO에서 `of()` 메서드 사용
 
 ## 데이터베이스
 
@@ -167,4 +196,5 @@ src/main/resources/
 ./gradlew test
 ```
 
-- 총 58개 테스트 케이스 (Groovy/Spock)
+- Spock Framework 기반 테스트
+- Service, Controller 단위 테스트 포함

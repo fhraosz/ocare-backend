@@ -1,10 +1,10 @@
 package com.ocare.domain.health.controller;
 
 import com.ocare.common.util.ResponseUtil;
-import com.ocare.domain.health.dto.DailySummaryResponse;
-import com.ocare.domain.health.dto.HealthDataRequest;
-import com.ocare.domain.health.dto.HealthDataSaveResponse;
-import com.ocare.domain.health.dto.MonthlySummaryResponse;
+import com.ocare.domain.health.dto.request.HealthDataRequest;
+import com.ocare.domain.health.dto.response.DailySummaryResponse;
+import com.ocare.domain.health.dto.response.HealthDataSaveResponse;
+import com.ocare.domain.health.dto.response.MonthlySummaryResponse;
 import com.ocare.domain.health.service.HealthDataService;
 import com.ocare.domain.health.service.HealthQueryService;
 import lombok.RequiredArgsConstructor;

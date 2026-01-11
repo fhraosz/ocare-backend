@@ -1,7 +1,11 @@
 package com.ocare.domain.health.service
 
-import com.ocare.domain.health.dto.HealthDataRequest
-import com.ocare.domain.health.dto.HealthDataSaveResponse
+import com.ocare.domain.health.dto.request.DataWrapper
+import com.ocare.domain.health.dto.request.EntryDto
+import com.ocare.domain.health.dto.request.HealthDataRequest
+import com.ocare.domain.health.dto.request.PeriodDto
+import com.ocare.domain.health.dto.request.ValueDto
+import com.ocare.domain.health.dto.response.HealthDataSaveResponse
 import com.ocare.domain.health.entity.HealthEntryEntity
 import com.ocare.domain.health.repository.HealthEntryRepository
 import spock.lang.Specification
@@ -37,7 +41,7 @@ class HealthDataServiceTest extends Specification {
         given:
         HealthDataRequest request = new HealthDataRequest()
         request.recordKey = "test-record-key"
-        request.data = new HealthDataRequest.DataWrapper()
+        request.data = new DataWrapper()
         request.data.entries = []
 
         when:
@@ -55,7 +59,7 @@ class HealthDataServiceTest extends Specification {
         given:
         HealthDataRequest request = new HealthDataRequest()
         request.recordKey = "test-record-key"
-        request.data = new HealthDataRequest.DataWrapper()
+        request.data = new DataWrapper()
         request.data.entries = null
 
         when:
@@ -95,7 +99,7 @@ class HealthDataServiceTest extends Specification {
 
     def "steps 값 Integer 타입 처리 테스트"() {
         given:
-        HealthDataRequest.EntryDto entry = new HealthDataRequest.EntryDto()
+        EntryDto entry = new EntryDto()
         entry.steps = 1000
 
         when:
@@ -107,7 +111,7 @@ class HealthDataServiceTest extends Specification {
 
     def "steps 값 String 타입 처리 테스트"() {
         given:
-        HealthDataRequest.EntryDto entry = new HealthDataRequest.EntryDto()
+        EntryDto entry = new EntryDto()
         entry.steps = "1500.7"
 
         when:
@@ -119,7 +123,7 @@ class HealthDataServiceTest extends Specification {
 
     def "steps 값 null 처리 테스트"() {
         given:
-        HealthDataRequest.EntryDto entry = new HealthDataRequest.EntryDto()
+        EntryDto entry = new EntryDto()
         entry.steps = null
 
         when:
@@ -131,7 +135,7 @@ class HealthDataServiceTest extends Specification {
 
     def "steps 값 잘못된 String 처리 테스트"() {
         given:
-        HealthDataRequest.EntryDto entry = new HealthDataRequest.EntryDto()
+        EntryDto entry = new EntryDto()
         entry.steps = "invalid"
 
         when:
@@ -143,7 +147,7 @@ class HealthDataServiceTest extends Specification {
 
     def "calories value Float 변환 테스트 - Number 타입"() {
         given:
-        HealthDataRequest.ValueDto valueDto = new HealthDataRequest.ValueDto()
+        ValueDto valueDto = new ValueDto()
         valueDto.value = 123.45
 
         when:
@@ -155,7 +159,7 @@ class HealthDataServiceTest extends Specification {
 
     def "calories value Float 변환 테스트 - String 타입"() {
         given:
-        HealthDataRequest.ValueDto valueDto = new HealthDataRequest.ValueDto()
+        ValueDto valueDto = new ValueDto()
         valueDto.value = "67.89"
 
         when:
@@ -167,7 +171,7 @@ class HealthDataServiceTest extends Specification {
 
     def "calories value Float 변환 테스트 - null 처리"() {
         given:
-        HealthDataRequest.ValueDto valueDto = new HealthDataRequest.ValueDto()
+        ValueDto valueDto = new ValueDto()
         valueDto.value = null
 
         when:
@@ -179,7 +183,7 @@ class HealthDataServiceTest extends Specification {
 
     def "calories value Float 변환 테스트 - 잘못된 String 처리"() {
         given:
-        HealthDataRequest.ValueDto valueDto = new HealthDataRequest.ValueDto()
+        ValueDto valueDto = new ValueDto()
         valueDto.value = "invalid"
 
         when:
@@ -193,20 +197,20 @@ class HealthDataServiceTest extends Specification {
     private HealthDataRequest createHealthDataRequest(String recordKey, int entryCount) {
         HealthDataRequest request = new HealthDataRequest()
         request.recordKey = recordKey
-        request.data = new HealthDataRequest.DataWrapper()
+        request.data = new DataWrapper()
         request.data.memo = "test memo"
         request.data.entries = []
 
         for (int i = 0; i < entryCount; i++) {
-            HealthDataRequest.EntryDto entry = new HealthDataRequest.EntryDto()
-            entry.period = new HealthDataRequest.PeriodDto()
+            EntryDto entry = new EntryDto()
+            entry.period = new PeriodDto()
             entry.period.from = "2024-01-01 10:${String.format('%02d', i * 10)}:00"
             entry.period.to = "2024-01-01 10:${String.format('%02d', (i + 1) * 10)}:00"
             entry.steps = 100 + i
-            entry.calories = new HealthDataRequest.ValueDto()
+            entry.calories = new ValueDto()
             entry.calories.unit = "kcal"
             entry.calories.value = 5.0 + i
-            entry.distance = new HealthDataRequest.ValueDto()
+            entry.distance = new ValueDto()
             entry.distance.unit = "km"
             entry.distance.value = 0.1 + (i * 0.05)
 

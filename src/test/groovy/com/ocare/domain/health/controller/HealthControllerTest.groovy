@@ -1,9 +1,10 @@
 package com.ocare.domain.health.controller
 
-import com.ocare.domain.health.dto.DailySummaryResponse
-import com.ocare.domain.health.dto.HealthDataRequest
-import com.ocare.domain.health.dto.HealthDataSaveResponse
-import com.ocare.domain.health.dto.MonthlySummaryResponse
+import com.ocare.domain.health.dto.request.DataWrapper
+import com.ocare.domain.health.dto.request.HealthDataRequest
+import com.ocare.domain.health.dto.response.DailySummaryResponse
+import com.ocare.domain.health.dto.response.HealthDataSaveResponse
+import com.ocare.domain.health.dto.response.MonthlySummaryResponse
 import com.ocare.domain.health.service.HealthDataService
 import com.ocare.domain.health.service.HealthQueryService
 import org.springframework.http.HttpStatus
@@ -25,7 +26,7 @@ class HealthControllerTest extends Specification {
         given:
         HealthDataRequest request = new HealthDataRequest()
         request.recordKey = "test-record-key"
-        request.data = new HealthDataRequest.DataWrapper()
+        request.data = new DataWrapper()
         request.data.entries = []
 
         HealthDataSaveResponse saveResponse = HealthDataSaveResponse.of("test-record-key", 5)

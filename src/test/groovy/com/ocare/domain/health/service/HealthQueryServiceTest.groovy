@@ -1,7 +1,7 @@
 package com.ocare.domain.health.service
 
-import com.ocare.domain.health.dto.DailySummaryResponse
-import com.ocare.domain.health.dto.MonthlySummaryResponse
+import com.ocare.domain.health.dto.response.DailySummaryResponse
+import com.ocare.domain.health.dto.response.MonthlySummaryResponse
 import com.ocare.domain.health.entity.DailyHealthSummaryEntity
 import com.ocare.domain.health.entity.MonthlyHealthSummaryEntity
 import com.ocare.domain.health.repository.DailyHealthSummaryRepository

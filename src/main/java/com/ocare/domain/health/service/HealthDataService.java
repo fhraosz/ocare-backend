@@ -1,7 +1,9 @@
 package com.ocare.domain.health.service;
 
-import com.ocare.domain.health.dto.HealthDataRequest;
-import com.ocare.domain.health.dto.HealthDataSaveResponse;
+import com.ocare.common.util.DateTimeUtil;
+import com.ocare.domain.health.dto.request.EntryDto;
+import com.ocare.domain.health.dto.request.HealthDataRequest;
+import com.ocare.domain.health.dto.response.HealthDataSaveResponse;
 import com.ocare.domain.health.entity.HealthEntryEntity;
 import com.ocare.domain.health.repository.HealthEntryRepository;
 import lombok.RequiredArgsConstructor;
@@ -10,16 +12,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * 건강 데이터 저장 서비스
- * JSON 데이터 파싱 및 저장 로직
- */
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -29,19 +25,12 @@ public class HealthDataService {
     private final HealthEntryRepository healthEntryRepository;
     private final HealthAggregationService aggregationService;
 
-    private static final DateTimeFormatter[] DATE_FORMATTERS = {
-            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"),
-            DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssZ"),
-            DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'+'SSSS"),
-            DateTimeFormatter.ISO_DATE_TIME
-    };
-
     /**
-     * JSON 데이터 저장
+     * 건강 데이터 저장 및 집계 처리
      */
     public HealthDataSaveResponse saveHealthData(HealthDataRequest request) {
         String recordKey = request.getRecordKey();
-        List<HealthDataRequest.EntryDto> entries = request.getData().getEntries();
+        List<EntryDto> entries = request.getData().getEntries();
 
         if (entries == null || entries.isEmpty()) {
             log.warn("Empty entries for recordKey: {}", recordKey);
@@ -50,34 +39,8 @@ public class HealthDataService {
 
         log.debug("건강 데이터 저장 시작: recordKey={}, entryCount={}", recordKey, entries.size());
 
-        int savedCount = 0;
         List<HealthEntryEntity> entriesToSave = new ArrayList<>();
-
-        for (HealthDataRequest.EntryDto entry : entries) {
-            try {
-                LocalDateTime periodFrom = parseDateTime(entry.getPeriod().getFrom());
-                LocalDateTime periodTo = parseDateTime(entry.getPeriod().getTo());
-                Integer steps = entry.getStepsAsInteger();
-                Float calories = entry.getCalories().getValueAsFloat();
-                Float distance = entry.getDistance().getValueAsFloat();
-
-                Optional<HealthEntryEntity> existingEntry = healthEntryRepository
-                        .findByRecordKeyAndPeriodFromAndPeriodTo(recordKey, periodFrom, periodTo);
-
-                if (existingEntry.isPresent()) {
-                    existingEntry.get().update(steps, calories, distance);
-                    entriesToSave.add(existingEntry.get());
-                } else {
-                    HealthEntryEntity healthEntry = HealthEntryEntity.of(
-                            recordKey, periodFrom, periodTo, steps, calories, distance);
-                    entriesToSave.add(healthEntry);
-                }
-                savedCount++;
-
-            } catch (Exception e) {
-                log.error("Failed to parse entry: {}", e.getMessage());
-            }
-        }
+        int savedCount = processEntries(recordKey, entries, entriesToSave);
 
         healthEntryRepository.saveAll(entriesToSave);
         log.info("건강 데이터 저장 완료: recordKey={}, savedCount={}", recordKey, savedCount);
@@ -88,42 +51,42 @@ public class HealthDataService {
     }
 
     /**
-     * 여러 형식의 날짜 문자열 파싱
+     * 건강 데이터 엔트리 목록 처리
      */
-    private LocalDateTime parseDateTime(String dateTimeStr) {
-        if (dateTimeStr == null || dateTimeStr.isBlank()) {
-            throw new IllegalArgumentException("DateTime string is empty");
-        }
+    private int processEntries(String recordKey, List<EntryDto> entries, List<HealthEntryEntity> entriesToSave) {
+        int savedCount = 0;
 
-        if (dateTimeStr.contains("+") && !dateTimeStr.contains("T")) {
-            dateTimeStr = dateTimeStr.replace(" ", "T");
-        }
-
-        if (dateTimeStr.matches(".*\\+\\d{4}$")) {
-            dateTimeStr = dateTimeStr.substring(0, dateTimeStr.length() - 2) + ":" +
-                    dateTimeStr.substring(dateTimeStr.length() - 2);
-        }
-
-        for (DateTimeFormatter formatter : DATE_FORMATTERS) {
+        for (EntryDto entry : entries) {
             try {
-                return LocalDateTime.parse(dateTimeStr, formatter);
-            } catch (DateTimeParseException e) {
-                // 다음 형식 시도
+                HealthEntryEntity healthEntry = parseAndSaveEntry(recordKey, entry);
+                entriesToSave.add(healthEntry);
+                savedCount++;
+            } catch (Exception e) {
+                log.error("Failed to parse entry: {}", e.getMessage());
             }
         }
 
-        try {
-            return LocalDateTime.parse(dateTimeStr.substring(0, 19),
-                    DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"));
-        } catch (Exception e) {
-            // ignore
+        return savedCount;
+    }
+
+    /**
+     * 단일 엔트리 파싱 및 엔티티 생성 (기존 데이터 있으면 업데이트)
+     */
+    private HealthEntryEntity parseAndSaveEntry(String recordKey, EntryDto entry) {
+        LocalDateTime periodFrom = DateTimeUtil.parse(entry.getPeriod().getFrom());
+        LocalDateTime periodTo = DateTimeUtil.parse(entry.getPeriod().getTo());
+        Integer steps = entry.getStepsAsInteger();
+        Float calories = entry.getCalories().getValueAsFloat();
+        Float distance = entry.getDistance().getValueAsFloat();
+
+        Optional<HealthEntryEntity> existingEntry = healthEntryRepository
+                .findByRecordKeyAndPeriodFromAndPeriodTo(recordKey, periodFrom, periodTo);
+
+        if (existingEntry.isPresent()) {
+            existingEntry.get().update(steps, calories, distance);
+            return existingEntry.get();
         }
 
-        try {
-            return LocalDateTime.parse(dateTimeStr.replace("T", " ").substring(0, 19),
-                    DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Cannot parse datetime: " + dateTimeStr);
-        }
+        return HealthEntryEntity.of(recordKey, periodFrom, periodTo, steps, calories, distance);
     }
 }

@@ -1,7 +1,7 @@
 package com.ocare.domain.health.service;
 
-import com.ocare.domain.health.dto.DailySummaryResponse;
-import com.ocare.domain.health.dto.MonthlySummaryResponse;
+import com.ocare.domain.health.dto.response.DailySummaryResponse;
+import com.ocare.domain.health.dto.response.MonthlySummaryResponse;
 import com.ocare.domain.health.repository.DailyHealthSummaryRepository;
 import com.ocare.domain.health.repository.MonthlyHealthSummaryRepository;
 import lombok.RequiredArgsConstructor;
@@ -13,10 +13,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * 건강 데이터 조회 서비스
- * 일별/월별 집계 데이터 조회
- */
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -27,7 +23,7 @@ public class HealthQueryService {
     private final MonthlyHealthSummaryRepository monthlySummaryRepository;
 
     /**
-     * 일별 집계 데이터 조회 (기간 선택적)
+     * 일별 집계 데이터 목록 조회 (기간 필터링 선택)
      */
     public List<DailySummaryResponse> getDailySummaries(String recordKey,
                                                          LocalDate startDate,
@@ -40,6 +36,7 @@ public class HealthQueryService {
                     .map(DailySummaryResponse::of)
                     .collect(Collectors.toList());
         }
+
         log.debug("일별 집계 조회: recordKey={}", recordKey);
         return dailySummaryRepository.findByRecordKeyOrderBySummaryDateAsc(recordKey)
                 .stream()
@@ -48,7 +45,7 @@ public class HealthQueryService {
     }
 
     /**
-     * 월별 집계 데이터 조회 (연도 선택적)
+     * 월별 집계 데이터 목록 조회 (연도 필터링 선택)
      */
     public List<MonthlySummaryResponse> getMonthlySummaries(String recordKey, Integer year) {
         if (year != null) {
@@ -58,6 +55,7 @@ public class HealthQueryService {
                     .map(MonthlySummaryResponse::of)
                     .collect(Collectors.toList());
         }
+
         log.debug("월별 집계 조회: recordKey={}", recordKey);
         return monthlySummaryRepository.findByRecordKeyOrderBySummaryYearAscSummaryMonthAsc(recordKey)
                 .stream()
@@ -66,7 +64,7 @@ public class HealthQueryService {
     }
 
     /**
-     * 특정 월 집계 데이터 조회
+     * 특정 연월 집계 데이터 조회
      */
     public MonthlySummaryResponse getMonthlySummary(String recordKey, Integer year, Integer month) {
         log.debug("특정 월 집계 조회: recordKey={}, year={}, month={}", recordKey, year, month);
@@ -77,7 +75,7 @@ public class HealthQueryService {
     }
 
     /**
-     * 특정 일 집계 데이터 조회
+     * 특정 일자 집계 데이터 조회
      */
     public DailySummaryResponse getDailySummary(String recordKey, LocalDate date) {
         log.debug("특정 일 집계 조회: recordKey={}, date={}", recordKey, date);
