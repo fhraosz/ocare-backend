@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>대시보드 - O-Care</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link th:href="@{/css/style.css}" rel="stylesheet">
+    <!-- Chart.js for 데이터 시각화 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-light">
+    <div th:replace="~{fragments/header :: header}"></div>
+
+    <main class="container py-4">
+        <!-- 환영 메시지 -->
+        <div class="row mb-4">
+            <div class="col">
+                <h2>
+                    <i class="bi bi-speedometer2"></i>
+                    <span id="welcome-message">환영합니다!</span>
+                </h2>
+                <p class="text-muted">건강 데이터를 한눈에 확인하세요.</p>
+            </div>
+        </div>
+
+        <!-- 알림 메시지 영역 -->
+        <div id="alert-container"></div>
+
+        <!-- 조회 조건 -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-3">
+                        <label class="form-label">조회 유형</label>
+                        <select class="form-select" id="query-type">
+                            <option value="daily" selected>일별 조회</option>
+                            <option value="monthly">월별 조회</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3" id="date-range-container">
+                        <label class="form-label">시작일</label>
+                        <input type="date" class="form-control" id="start-date">
+                    </div>
+                    <div class="col-md-3" id="end-date-container">
+                        <label class="form-label">종료일</label>
+                        <input type="date" class="form-control" id="end-date">
+                    </div>
+                    <div class="col-md-3 d-none" id="year-container">
+                        <label class="form-label">연도</label>
+                        <select class="form-select" id="query-year"></select>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-primary w-100" onclick="loadHealthData()">
+                            <i class="bi bi-search"></i> 조회
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 요약 카드 -->
+        <div class="row mb-4" id="summary-cards">
+            <div class="col-md-4 mb-3 mb-md-0">
+                <div class="card text-center border-primary h-100">
+                    <div class="card-body">
+                        <i class="bi bi-person-walking fs-1 text-primary"></i>
+                        <h5 class="card-title mt-2">총 걸음 수</h5>
+                        <h2 class="text-primary" id="total-steps">-</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3 mb-md-0">
+                <div class="card text-center border-danger h-100">
+                    <div class="card-body">
+                        <i class="bi bi-fire fs-1 text-danger"></i>
+                        <h5 class="card-title mt-2">총 칼로리</h5>
+                        <h2 class="text-danger" id="total-calories">-</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center border-success h-100">
+                    <div class="card-body">
+                        <i class="bi bi-geo-alt fs-1 text-success"></i>
+                        <h5 class="card-title mt-2">총 거리</h5>
+                        <h2 class="text-success" id="total-distance">-</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 차트 영역 -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="bi bi-bar-chart-line"></i> 건강 데이터 추이
+            </div>
+            <div class="card-body">
+                <canvas id="health-chart" height="100"></canvas>
+            </div>
+        </div>
+
+        <!-- 상세 데이터 테이블 -->
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-table"></i> 상세 데이터
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>날짜</th>
+                                <th class="text-end">걸음 수</th>
+                                <th class="text-end">칼로리 (kcal)</th>
+                                <th class="text-end">거리 (km)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="data-table-body">
+                            <tr>
+                                <td colspan="4" class="text-center text-muted">
+                                    조회 버튼을 눌러 데이터를 확인하세요.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:src="@{/js/api.js}"></script>
+    <script th:src="@{/js/auth.js}"></script>
+    <script th:src="@{/js/dashboard.js}"></script>
+    <script>
+        // 인증 확인
+        requireAuth();
+        initDashboard();
+    </script>
+</body>
+</html>

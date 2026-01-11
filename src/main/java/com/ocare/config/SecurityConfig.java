@@ -51,6 +51,12 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 // URL별 권한 설정
                 .authorizeHttpRequests(auth -> auth
+                        // 정적 리소스 허용
+                        .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
+                        // 공개 페이지 허용
+                        .requestMatchers("/", "/login", "/signup").permitAll()
+                        // 대시보드 페이지 (JS에서 JWT 체크)
+                        .requestMatchers("/dashboard/**").permitAll()
                         // 공개 API
                         .requestMatchers("/api/members/signup", "/api/members/login").permitAll()
                         // H2 Console
