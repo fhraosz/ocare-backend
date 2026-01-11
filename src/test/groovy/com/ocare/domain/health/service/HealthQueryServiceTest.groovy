@@ -30,7 +30,7 @@ class HealthQueryServiceTest extends Specification {
         ]
 
         when:
-        List<DailySummaryResponse> result = healthQueryService.getDailySummaries(recordKey)
+        List<DailySummaryResponse> result = healthQueryService.getDailySummaries(recordKey, null, null)
 
         then:
         1 * dailySummaryRepository.findByRecordKeyOrderBySummaryDateAsc(recordKey) >> entities
@@ -46,7 +46,7 @@ class HealthQueryServiceTest extends Specification {
         String recordKey = "empty-record-key"
 
         when:
-        List<DailySummaryResponse> result = healthQueryService.getDailySummaries(recordKey)
+        List<DailySummaryResponse> result = healthQueryService.getDailySummaries(recordKey, null, null)
 
         then:
         1 * dailySummaryRepository.findByRecordKeyOrderBySummaryDateAsc(recordKey) >> []
@@ -119,7 +119,7 @@ class HealthQueryServiceTest extends Specification {
         ]
 
         when:
-        List<MonthlySummaryResponse> result = healthQueryService.getMonthlySummaries(recordKey)
+        List<MonthlySummaryResponse> result = healthQueryService.getMonthlySummaries(recordKey, null)
 
         then:
         1 * monthlySummaryRepository.findByRecordKeyOrderBySummaryYearAscSummaryMonthAsc(recordKey) >> entities
@@ -136,7 +136,7 @@ class HealthQueryServiceTest extends Specification {
         String recordKey = "empty-record-key"
 
         when:
-        List<MonthlySummaryResponse> result = healthQueryService.getMonthlySummaries(recordKey)
+        List<MonthlySummaryResponse> result = healthQueryService.getMonthlySummaries(recordKey, null)
 
         then:
         1 * monthlySummaryRepository.findByRecordKeyOrderBySummaryYearAscSummaryMonthAsc(recordKey) >> []

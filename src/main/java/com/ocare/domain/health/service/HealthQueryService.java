@@ -27,9 +27,19 @@ public class HealthQueryService {
     private final MonthlyHealthSummaryRepository monthlySummaryRepository;
 
     /**
-     * 일별 집계 데이터 조회 (전체)
+     * 일별 집계 데이터 조회 (기간 선택적)
      */
-    public List<DailySummaryResponse> getDailySummaries(String recordKey) {
+    public List<DailySummaryResponse> getDailySummaries(String recordKey,
+                                                         LocalDate startDate,
+                                                         LocalDate endDate) {
+        if (startDate != null && endDate != null) {
+            log.debug("일별 집계 조회: recordKey={}, startDate={}, endDate={}", recordKey, startDate, endDate);
+            return dailySummaryRepository
+                    .findByRecordKeyAndSummaryDateBetweenOrderBySummaryDateAsc(recordKey, startDate, endDate)
+                    .stream()
+                    .map(DailySummaryResponse::of)
+                    .collect(Collectors.toList());
+        }
         log.debug("일별 집계 조회: recordKey={}", recordKey);
         return dailySummaryRepository.findByRecordKeyOrderBySummaryDateAsc(recordKey)
                 .stream()
@@ -38,36 +48,18 @@ public class HealthQueryService {
     }
 
     /**
-     * 일별 집계 데이터 조회 (기간)
-     */
-    public List<DailySummaryResponse> getDailySummaries(String recordKey,
-                                                         LocalDate startDate,
-                                                         LocalDate endDate) {
-        log.debug("일별 집계 조회: recordKey={}, startDate={}, endDate={}", recordKey, startDate, endDate);
-        return dailySummaryRepository
-                .findByRecordKeyAndSummaryDateBetweenOrderBySummaryDateAsc(recordKey, startDate, endDate)
-                .stream()
-                .map(DailySummaryResponse::of)
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * 월별 집계 데이터 조회 (전체)
-     */
-    public List<MonthlySummaryResponse> getMonthlySummaries(String recordKey) {
-        log.debug("월별 집계 조회: recordKey={}", recordKey);
-        return monthlySummaryRepository.findByRecordKeyOrderBySummaryYearAscSummaryMonthAsc(recordKey)
-                .stream()
-                .map(MonthlySummaryResponse::of)
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * 월별 집계 데이터 조회 (특정 연도)
+     * 월별 집계 데이터 조회 (연도 선택적)
      */
     public List<MonthlySummaryResponse> getMonthlySummaries(String recordKey, Integer year) {
-        log.debug("월별 집계 조회: recordKey={}, year={}", recordKey, year);
-        return monthlySummaryRepository.findByRecordKeyAndSummaryYearOrderBySummaryMonthAsc(recordKey, year)
+        if (year != null) {
+            log.debug("월별 집계 조회: recordKey={}, year={}", recordKey, year);
+            return monthlySummaryRepository.findByRecordKeyAndSummaryYearOrderBySummaryMonthAsc(recordKey, year)
+                    .stream()
+                    .map(MonthlySummaryResponse::of)
+                    .collect(Collectors.toList());
+        }
+        log.debug("월별 집계 조회: recordKey={}", recordKey);
+        return monthlySummaryRepository.findByRecordKeyOrderBySummaryYearAscSummaryMonthAsc(recordKey)
                 .stream()
                 .map(MonthlySummaryResponse::of)
                 .collect(Collectors.toList());

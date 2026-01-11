@@ -1,6 +1,7 @@
 package com.ocare.domain.health.service
 
 import com.ocare.domain.health.dto.HealthDataRequest
+import com.ocare.domain.health.dto.HealthDataSaveResponse
 import com.ocare.domain.health.entity.HealthEntryEntity
 import com.ocare.domain.health.repository.HealthEntryRepository
 import spock.lang.Specification
@@ -21,14 +22,15 @@ class HealthDataServiceTest extends Specification {
         HealthDataRequest request = createHealthDataRequest("test-record-key", 2)
 
         when:
-        int savedCount = healthDataService.saveHealthData(request)
+        HealthDataSaveResponse response = healthDataService.saveHealthData(request)
 
         then:
         2 * healthEntryRepository.findByRecordKeyAndPeriodFromAndPeriodTo(_, _, _) >> Optional.empty()
         1 * healthEntryRepository.saveAll(_ as List) >> []
         1 * aggregationService.updateAggregations("test-record-key")
 
-        savedCount == 2
+        response.savedCount == 2
+        response.recordKey == "test-record-key"
     }
 
     def "건강 데이터 저장 테스트 - 빈 엔트리"() {
@@ -39,14 +41,14 @@ class HealthDataServiceTest extends Specification {
         request.data.entries = []
 
         when:
-        int savedCount = healthDataService.saveHealthData(request)
+        HealthDataSaveResponse response = healthDataService.saveHealthData(request)
 
         then:
         0 * healthEntryRepository.findByRecordKeyAndPeriodFromAndPeriodTo(_, _, _)
         0 * healthEntryRepository.saveAll(_)
         0 * aggregationService.updateAggregations(_)
 
-        savedCount == 0
+        response.savedCount == 0
     }
 
     def "건강 데이터 저장 테스트 - null 엔트리"() {
@@ -57,12 +59,12 @@ class HealthDataServiceTest extends Specification {
         request.data.entries = null
 
         when:
-        int savedCount = healthDataService.saveHealthData(request)
+        HealthDataSaveResponse response = healthDataService.saveHealthData(request)
 
         then:
         0 * healthEntryRepository.saveAll(_)
 
-        savedCount == 0
+        response.savedCount == 0
     }
 
     def "건강 데이터 업데이트 테스트 - 기존 데이터 존재"() {
@@ -81,14 +83,14 @@ class HealthDataServiceTest extends Specification {
                 .build()
 
         when:
-        int savedCount = healthDataService.saveHealthData(request)
+        HealthDataSaveResponse response = healthDataService.saveHealthData(request)
 
         then:
         1 * healthEntryRepository.findByRecordKeyAndPeriodFromAndPeriodTo("test-record-key", _, _) >> Optional.of(existingEntry)
         1 * healthEntryRepository.saveAll(_ as List) >> [existingEntry]
         1 * aggregationService.updateAggregations("test-record-key")
 
-        savedCount == 1
+        response.savedCount == 1
     }
 
     def "steps 값 Integer 타입 처리 테스트"() {

@@ -1,8 +1,8 @@
 package com.ocare.domain.health.controller
 
-import com.ocare.common.response.ApiResponse
 import com.ocare.domain.health.dto.DailySummaryResponse
 import com.ocare.domain.health.dto.HealthDataRequest
+import com.ocare.domain.health.dto.HealthDataSaveResponse
 import com.ocare.domain.health.dto.MonthlySummaryResponse
 import com.ocare.domain.health.service.HealthDataService
 import com.ocare.domain.health.service.HealthQueryService
@@ -28,17 +28,17 @@ class HealthControllerTest extends Specification {
         request.data = new HealthDataRequest.DataWrapper()
         request.data.entries = []
 
+        HealthDataSaveResponse saveResponse = HealthDataSaveResponse.of("test-record-key", 5)
+
         when:
-        ResponseEntity<ApiResponse<Map<String, Object>>> result = healthController.saveHealthData(request)
+        ResponseEntity<HealthDataSaveResponse> result = healthController.saveHealthData(request)
 
         then:
-        1 * healthDataService.saveHealthData(request) >> 5
+        1 * healthDataService.saveHealthData(request) >> saveResponse
 
         result.statusCode == HttpStatus.CREATED
-        result.body.success == true
-        result.body.message == "건강 데이터가 저장되었습니다"
-        result.body.data.recordKey == "test-record-key"
-        result.body.data.savedCount == 5
+        result.body.recordKey == "test-record-key"
+        result.body.savedCount == 5
     }
 
     def "일별 집계 데이터 조회 API 테스트 - 전체 조회"() {
@@ -63,15 +63,14 @@ class HealthControllerTest extends Specification {
         ]
 
         when:
-        ResponseEntity<ApiResponse<List<DailySummaryResponse>>> result =
+        ResponseEntity<List<DailySummaryResponse>> result =
                 healthController.getDailySummaries(recordKey, null, null)
 
         then:
-        1 * healthQueryService.getDailySummaries(recordKey) >> summaries
+        1 * healthQueryService.getDailySummaries(recordKey, null, null) >> summaries
 
         result.statusCode == HttpStatus.OK
-        result.body.success == true
-        result.body.data.size() == 2
+        result.body.size() == 2
     }
 
     def "일별 집계 데이터 조회 API 테스트 - 기간 조회"() {
@@ -91,14 +90,14 @@ class HealthControllerTest extends Specification {
         ]
 
         when:
-        ResponseEntity<ApiResponse<List<DailySummaryResponse>>> result =
+        ResponseEntity<List<DailySummaryResponse>> result =
                 healthController.getDailySummaries(recordKey, startDate, endDate)
 
         then:
         1 * healthQueryService.getDailySummaries(recordKey, startDate, endDate) >> summaries
 
         result.statusCode == HttpStatus.OK
-        result.body.data.size() == 1
+        result.body.size() == 1
     }
 
     def "특정 일자 집계 데이터 조회 API 성공 테스트"() {
@@ -115,15 +114,14 @@ class HealthControllerTest extends Specification {
                 .build()
 
         when:
-        ResponseEntity<ApiResponse<DailySummaryResponse>> result =
+        ResponseEntity<DailySummaryResponse> result =
                 healthController.getDailySummary(date, recordKey)
 
         then:
         1 * healthQueryService.getDailySummary(recordKey, date) >> summary
 
         result.statusCode == HttpStatus.OK
-        result.body.success == true
-        result.body.data.steps == 8000
+        result.body.steps == 8000
     }
 
     def "특정 일자 집계 데이터 조회 API 테스트 - 데이터 없음"() {
@@ -132,16 +130,14 @@ class HealthControllerTest extends Specification {
         LocalDate date = LocalDate.of(2024, 12, 31)
 
         when:
-        ResponseEntity<ApiResponse<DailySummaryResponse>> result =
+        ResponseEntity<DailySummaryResponse> result =
                 healthController.getDailySummary(date, recordKey)
 
         then:
         1 * healthQueryService.getDailySummary(recordKey, date) >> null
 
         result.statusCode == HttpStatus.OK
-        result.body.success == true
-        result.body.message == "해당 날짜의 데이터가 없습니다"
-        result.body.data == null
+        result.body == null
     }
 
     def "월별 집계 데이터 조회 API 테스트 - 전체 조회"() {
@@ -160,14 +156,14 @@ class HealthControllerTest extends Specification {
         ]
 
         when:
-        ResponseEntity<ApiResponse<List<MonthlySummaryResponse>>> result =
+        ResponseEntity<List<MonthlySummaryResponse>> result =
                 healthController.getMonthlySummaries(recordKey, null)
 
         then:
-        1 * healthQueryService.getMonthlySummaries(recordKey) >> summaries
+        1 * healthQueryService.getMonthlySummaries(recordKey, null) >> summaries
 
         result.statusCode == HttpStatus.OK
-        result.body.data.size() == 1
+        result.body.size() == 1
     }
 
     def "월별 집계 데이터 조회 API 테스트 - 특정 연도"() {
@@ -187,14 +183,14 @@ class HealthControllerTest extends Specification {
         ]
 
         when:
-        ResponseEntity<ApiResponse<List<MonthlySummaryResponse>>> result =
+        ResponseEntity<List<MonthlySummaryResponse>> result =
                 healthController.getMonthlySummaries(recordKey, year)
 
         then:
         1 * healthQueryService.getMonthlySummaries(recordKey, year) >> summaries
 
         result.statusCode == HttpStatus.OK
-        result.body.data[0].year == 2024
+        result.body[0].year == 2024
     }
 
     def "특정 월 집계 데이터 조회 API 성공 테스트"() {
@@ -213,16 +209,16 @@ class HealthControllerTest extends Specification {
                 .build()
 
         when:
-        ResponseEntity<ApiResponse<MonthlySummaryResponse>> result =
+        ResponseEntity<MonthlySummaryResponse> result =
                 healthController.getMonthlySummary(year, month, recordKey)
 
         then:
         1 * healthQueryService.getMonthlySummary(recordKey, year, month) >> summary
 
         result.statusCode == HttpStatus.OK
-        result.body.data.year == 2024
-        result.body.data.month == 3
-        result.body.data.steps == 160000
+        result.body.year == 2024
+        result.body.month == 3
+        result.body.steps == 160000
     }
 
     def "특정 월 집계 데이터 조회 API 테스트 - 데이터 없음"() {
@@ -232,14 +228,13 @@ class HealthControllerTest extends Specification {
         Integer month = 12
 
         when:
-        ResponseEntity<ApiResponse<MonthlySummaryResponse>> result =
+        ResponseEntity<MonthlySummaryResponse> result =
                 healthController.getMonthlySummary(year, month, recordKey)
 
         then:
         1 * healthQueryService.getMonthlySummary(recordKey, year, month) >> null
 
         result.statusCode == HttpStatus.OK
-        result.body.message == "해당 월의 데이터가 없습니다"
-        result.body.data == null
+        result.body == null
     }
 }

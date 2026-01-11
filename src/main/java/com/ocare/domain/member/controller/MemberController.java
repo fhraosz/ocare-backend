@@ -1,12 +1,11 @@
 package com.ocare.domain.member.controller;
 
-import com.ocare.common.response.ApiResponse;
+import com.ocare.common.util.ResponseUtil;
 import com.ocare.domain.member.dto.LoginRequest;
 import com.ocare.domain.member.dto.LoginResponse;
 import com.ocare.domain.member.dto.MemberResponse;
 import com.ocare.domain.member.dto.SignUpRequest;
 import com.ocare.domain.member.service.MemberService;
-import com.ocare.util.ResponseUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -27,10 +26,8 @@ public class MemberController {
      * POST /api/members/signup
      */
     @PostMapping("/signup")
-    public ResponseEntity<ApiResponse<MemberResponse>> signUp(
-            @Valid @RequestBody SignUpRequest request) {
-        MemberResponse response = memberService.signUp(request);
-        return ResponseUtils.created(ApiResponse.success("회원가입이 완료되었습니다", response));
+    public ResponseEntity<MemberResponse> signUp(@Valid @RequestBody SignUpRequest request) {
+        return ResponseUtil.created(memberService.signUp(request));
     }
 
     /**
@@ -38,9 +35,7 @@ public class MemberController {
      * POST /api/members/login
      */
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<LoginResponse>> login(
-            @Valid @RequestBody LoginRequest request) {
-        LoginResponse response = memberService.login(request);
-        return ResponseUtils.ok(ApiResponse.success("로그인 성공", response));
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
+        return ResponseUtil.ok(memberService.login(request));
     }
 }

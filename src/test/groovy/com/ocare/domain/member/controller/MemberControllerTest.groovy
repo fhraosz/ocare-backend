@@ -1,6 +1,5 @@
 package com.ocare.domain.member.controller
 
-import com.ocare.common.response.ApiResponse
 import com.ocare.domain.member.dto.LoginRequest
 import com.ocare.domain.member.dto.LoginResponse
 import com.ocare.domain.member.dto.MemberResponse
@@ -38,16 +37,14 @@ class MemberControllerTest extends Specification {
                 .build()
 
         when:
-        ResponseEntity<ApiResponse<MemberResponse>> result = memberController.signUp(request)
+        ResponseEntity<MemberResponse> result = memberController.signUp(request)
 
         then:
         1 * memberService.signUp(request) >> memberResponse
 
         result.statusCode == HttpStatus.CREATED
-        result.body.success == true
-        result.body.message == "회원가입이 완료되었습니다"
-        result.body.data.id == 1L
-        result.body.data.email == "gildong@test.com"
+        result.body.id == 1L
+        result.body.email == "gildong@test.com"
     }
 
     def "로그인 API 성공 테스트"() {
@@ -71,15 +68,13 @@ class MemberControllerTest extends Specification {
                 .build()
 
         when:
-        ResponseEntity<ApiResponse<LoginResponse>> result = memberController.login(request)
+        ResponseEntity<LoginResponse> result = memberController.login(request)
 
         then:
         1 * memberService.login(request) >> loginResponse
 
         result.statusCode == HttpStatus.OK
-        result.body.success == true
-        result.body.message == "로그인 성공"
-        result.body.data.accessToken == "jwt-token-string"
-        result.body.data.member.id == 1L
+        result.body.accessToken == "jwt-token-string"
+        result.body.member.id == 1L
     }
 }

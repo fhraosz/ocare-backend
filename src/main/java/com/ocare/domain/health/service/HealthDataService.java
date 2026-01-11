@@ -1,6 +1,7 @@
 package com.ocare.domain.health.service;
 
 import com.ocare.domain.health.dto.HealthDataRequest;
+import com.ocare.domain.health.dto.HealthDataSaveResponse;
 import com.ocare.domain.health.entity.HealthEntryEntity;
 import com.ocare.domain.health.repository.HealthEntryRepository;
 import lombok.RequiredArgsConstructor;
@@ -38,13 +39,13 @@ public class HealthDataService {
     /**
      * JSON 데이터 저장
      */
-    public int saveHealthData(HealthDataRequest request) {
+    public HealthDataSaveResponse saveHealthData(HealthDataRequest request) {
         String recordKey = request.getRecordKey();
         List<HealthDataRequest.EntryDto> entries = request.getData().getEntries();
 
         if (entries == null || entries.isEmpty()) {
             log.warn("Empty entries for recordKey: {}", recordKey);
-            return 0;
+            return HealthDataSaveResponse.of(recordKey, 0);
         }
 
         log.debug("건강 데이터 저장 시작: recordKey={}, entryCount={}", recordKey, entries.size());
@@ -83,7 +84,7 @@ public class HealthDataService {
 
         aggregationService.updateAggregations(recordKey);
 
-        return savedCount;
+        return HealthDataSaveResponse.of(recordKey, savedCount);
     }
 
     /**
