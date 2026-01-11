@@ -14,6 +14,8 @@
 
 ## 실행 방법
 
+### 1. 프로젝트 빌드 및 실행
+
 ```bash
 # 프로젝트 빌드
 ./gradlew build
@@ -22,7 +24,70 @@
 ./gradlew bootRun
 ```
 
-실행 후 http://localhost:8080 접속
+### 2. 브라우저 접속
+
+http://localhost:8080 접속
+
+### 3. 회원가입 및 로그인
+
+1. `/signup` 페이지에서 회원가입
+2. `/login` 페이지에서 로그인
+3. 로그인 성공 시 `/dashboard`로 자동 이동
+
+## 테스트 데이터 입력 방법
+
+INPUT_DATA1~4.json 파일을 API로 업로드하는 방법입니다.
+
+### 1. 로그인하여 JWT 토큰 받기
+
+```bash
+# 로그인 (회원가입 먼저 완료 필요)
+curl -X POST http://localhost:8080/api/members/login \
+  -H "Content-Type: application/json" \
+  -d '{"email": "your@email.com", "password": "yourpassword"}'
+```
+
+응답에서 `accessToken`과 `recordKey`를 확인합니다.
+
+### 2. JSON 파일 업로드
+
+```bash
+# recordKey를 본인 계정의 것으로 변경하여 업로드
+cat INPUT_DATA1.json | sed 's/"recordkey" : "[^"]*"/"recordkey": "YOUR_RECORD_KEY"/' | \
+curl -X POST http://localhost:8080/api/health/data \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -d @-
+```
+
+### 3. 전체 파일 일괄 업로드 스크립트
+
+```bash
+# 로그인
+LOGIN_RESPONSE=$(curl -s -X POST http://localhost:8080/api/members/login \
+  -H "Content-Type: application/json" \
+  -d '{"email": "your@email.com", "password": "yourpassword"}')
+
+# 토큰과 recordKey 추출
+TOKEN=$(echo $LOGIN_RESPONSE | python3 -c "import sys,json; print(json.load(sys.stdin)['data']['accessToken'])")
+RECORD_KEY=$(echo $LOGIN_RESPONSE | python3 -c "import sys,json; print(json.load(sys.stdin)['data']['member']['recordKey'])")
+
+# 각 파일 업로드
+for i in 1 2 3 4; do
+  cat INPUT_DATA${i}.json | \
+  python3 -c "import sys,json; d=json.load(sys.stdin); d['recordkey']='$RECORD_KEY'; print(json.dumps(d))" | \
+  curl -s -X POST http://localhost:8080/api/health/data \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer $TOKEN" \
+    -d @-
+  echo "INPUT_DATA${i}.json 업로드 완료"
+done
+```
+
+### 4. 대시보드에서 확인
+
+- 날짜 범위: 2024-11-14 ~ 2024-12-16
+- 일별 조회 또는 월별 조회로 데이터 확인
 
 ## 페이지 구성
 
@@ -95,12 +160,6 @@ src/main/resources/
 - JDBC URL: `jdbc:h2:file:./data/ocaredb`
 - Username: `sa`
 - Password: (없음)
-
-## 테스트 데이터
-
-INPUT_DATA1~4.json 파일의 데이터 범위:
-- 시작일: 2024-11-14
-- 종료일: 2024-12-16
 
 ## 테스트
 
