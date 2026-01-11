@@ -161,6 +161,39 @@ src/main/resources/
 └── application.yml
 ```
 
+## 아키텍처
+
+### 응답 구조
+
+모든 API 응답은 `ApiResponseWrapper`에 의해 자동으로 래핑됩니다.
+
+```json
+{
+  "success": true,
+  "message": "성공",
+  "data": { ... }
+}
+```
+
+### 컨트롤러 설계
+
+컨트롤러는 서비스 호출만 담당하며, 비즈니스 로직은 서비스 레이어에 위치합니다.
+
+```java
+@PostMapping("/signup")
+public ResponseEntity<MemberResponse> signUp(@Valid @RequestBody SignUpRequest request) {
+    return ResponseUtil.created(memberService.signUp(request));
+}
+```
+
+### 유틸리티 클래스
+
+| 클래스 | 설명 |
+|--------|------|
+| `ResponseUtil` | ResponseEntity 생성 유틸 (`ok()`, `created()`, `notFound()`) |
+| `DateTimeUtil` | 날짜/시간 파싱 유틸 |
+| `ApiResponseWrapper` | ResponseBodyAdvice로 응답 자동 래핑 |
+
 ## 코딩 스타일
 
 프로젝트 코딩 스타일 가이드는 [CODING_STYLE.md](./CODING_STYLE.md)를 참조하세요.
@@ -169,6 +202,7 @@ src/main/resources/
 
 - **Entity**: `*Entity` suffix 사용 (예: `MemberEntity`)
 - **DTO**: request/response 패키지로 분리, 파일당 하나의 클래스
+- **Controller**: 서비스 호출만 담당, 로직은 서비스로 위임
 - **Service**: 메서드 분리, Javadoc 주석 필수
 - **정적 팩토리 메서드**: Entity, Response DTO에서 `of()` 메서드 사용
 
