@@ -12,6 +12,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -31,7 +32,7 @@ public class HealthController {
      * POST /api/health/data
      */
     @PostMapping("/data")
-    public ResponseEntity<HealthDataSaveResponse> saveHealthData(@RequestBody HealthDataRequest request) {
+    public ResponseEntity<HealthDataSaveResponse> saveHealthData(@Valid @RequestBody HealthDataRequest request) {
         return ResponseUtil.created(healthDataService.saveHealthData(request));
     }
 
@@ -55,7 +56,7 @@ public class HealthController {
     public ResponseEntity<DailySummaryResponse> getDailySummary(
             @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
             @RequestParam String recordKey) {
-        return ResponseUtil.ok(healthQueryService.getDailySummary(recordKey, date));
+        return ResponseUtil.okOrNotFound(healthQueryService.getDailySummary(recordKey, date));
     }
 
     /**
@@ -78,6 +79,6 @@ public class HealthController {
             @PathVariable Integer year,
             @PathVariable Integer month,
             @RequestParam String recordKey) {
-        return ResponseUtil.ok(healthQueryService.getMonthlySummary(recordKey, year, month));
+        return ResponseUtil.okOrNotFound(healthQueryService.getMonthlySummary(recordKey, year, month));
     }
 }

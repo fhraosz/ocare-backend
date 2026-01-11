@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -66,22 +67,20 @@ public class HealthQueryService {
     /**
      * 특정 연월 집계 데이터 조회
      */
-    public MonthlySummaryResponse getMonthlySummary(String recordKey, Integer year, Integer month) {
+    public Optional<MonthlySummaryResponse> getMonthlySummary(String recordKey, Integer year, Integer month) {
         log.debug("특정 월 집계 조회: recordKey={}, year={}, month={}", recordKey, year, month);
         return monthlySummaryRepository
                 .findByRecordKeyAndSummaryYearAndSummaryMonth(recordKey, year, month)
-                .map(MonthlySummaryResponse::of)
-                .orElse(null);
+                .map(MonthlySummaryResponse::of);
     }
 
     /**
      * 특정 일자 집계 데이터 조회
      */
-    public DailySummaryResponse getDailySummary(String recordKey, LocalDate date) {
+    public Optional<DailySummaryResponse> getDailySummary(String recordKey, LocalDate date) {
         log.debug("특정 일 집계 조회: recordKey={}, date={}", recordKey, date);
         return dailySummaryRepository
                 .findByRecordKeyAndSummaryDate(recordKey, date)
-                .map(DailySummaryResponse::of)
-                .orElse(null);
+                .map(DailySummaryResponse::of);
     }
 }

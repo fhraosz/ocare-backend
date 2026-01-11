@@ -70,18 +70,45 @@ private void validatePassword(String rawPassword, String encodedPassword)
 - 내부 클래스 사용 금지 (별도 파일로 분리)
 
 ### 3.2 필수 어노테이션
+- **요청 DTO**: `@Getter`, `@NoArgsConstructor`, `@AllArgsConstructor` (Setter 사용 금지)
+- **응답 DTO**: `@Getter`, `@NoArgsConstructor`, `@AllArgsConstructor`, `@Builder`
+
 ```java
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 public class SignUpRequest {
+
+    @NotBlank(message = "이름은 필수입니다")
     private String name;
+
+    @NotBlank(message = "이메일은 필수입니다")
+    @Email(message = "올바른 이메일 형식이 아닙니다")
     private String email;
     // ...
 }
 ```
 
-### 3.3 응답 DTO 정적 팩토리 메서드
+### 3.3 입력 검증
+- 요청 DTO에 Jakarta Validation 어노테이션 사용
+- 중첩 객체는 `@Valid`로 검증 전파
+
+```java
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
+public class HealthDataRequest {
+
+    @NotBlank(message = "recordKey는 필수입니다")
+    private String recordKey;
+
+    @NotNull(message = "data는 필수입니다")
+    @Valid
+    private DataWrapper data;
+}
+```
+
+### 3.4 응답 DTO 정적 팩토리 메서드
 ```java
 @Getter
 @NoArgsConstructor
@@ -197,6 +224,19 @@ private void validateDuplicateEmail(String email) {
 }
 ```
 
+### 5.4 Optional 반환
+- 단일 조회 시 null 대신 Optional 반환
+```java
+/**
+ * 특정 일자 집계 데이터 조회
+ */
+public Optional<DailySummaryResponse> getDailySummary(String recordKey, LocalDate date) {
+    return dailySummaryRepository
+            .findByRecordKeyAndSummaryDate(recordKey, date)
+            .map(DailySummaryResponse::of);
+}
+```
+
 ## 6. Controller 규칙
 
 ### 6.1 ResponseUtil 사용
@@ -207,18 +247,31 @@ private void validateDuplicateEmail(String email) {
 public class MemberController {
 
     @PostMapping("/signup")
-    public ResponseEntity<MemberResponse> signUp(@RequestBody SignUpRequest request) {
+    public ResponseEntity<MemberResponse> signUp(@Valid @RequestBody SignUpRequest request) {
         return ResponseUtil.created(memberService.signUp(request));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
         return ResponseUtil.ok(memberService.login(request));
     }
 }
 ```
 
-### 6.2 API 문서화
+### 6.2 Optional 처리
+- 단일 조회 결과가 없을 수 있는 경우 Optional 사용
+- `ResponseUtil.okOrNotFound()` 활용
+
+```java
+@GetMapping("/daily/{date}")
+public ResponseEntity<DailySummaryResponse> getDailySummary(
+        @PathVariable LocalDate date,
+        @RequestParam String recordKey) {
+    return ResponseUtil.okOrNotFound(healthQueryService.getDailySummary(recordKey, date));
+}
+```
+
+### 6.3 API 문서화
 ```java
 /**
  * 회원 API 컨트롤러
@@ -347,15 +400,26 @@ class MemberServiceTest extends Specification {
 
 ## 11. 금지 사항
 
-1. 불필요한 주석 금지
+1. **불필요한 주석 금지**
    - `// 정적 팩토리 메서드` 같은 명백한 주석 금지
    - `/** Entity -> DTO 변환 */` 같은 단순 변환 설명 금지
 
-2. 내부 클래스 사용 금지
+2. **내부 클래스 사용 금지**
    - 모든 클래스는 별도 파일로 분리
 
-3. 하드코딩 금지
+3. **하드코딩 금지**
    - 에러 메시지, 상태 코드 등은 ErrorCode enum 사용
 
-4. 매직 넘버 금지
+4. **매직 넘버 금지**
    - 상수로 정의하여 사용
+
+5. **@Setter 사용 금지 (요청 DTO)**
+   - 요청 DTO는 불변성 유지를 위해 @Getter만 사용
+   - Jackson이 기본 생성자 + 필드 접근으로 역직렬화
+
+6. **null 반환 금지**
+   - 단일 조회 시 Optional 사용
+   - 컬렉션 조회 시 빈 컬렉션 반환
+
+7. **@Deprecated 메서드 금지**
+   - 사용하지 않는 메서드는 완전히 제거

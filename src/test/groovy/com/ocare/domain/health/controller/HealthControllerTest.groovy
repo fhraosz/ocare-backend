@@ -119,7 +119,7 @@ class HealthControllerTest extends Specification {
                 healthController.getDailySummary(date, recordKey)
 
         then:
-        1 * healthQueryService.getDailySummary(recordKey, date) >> summary
+        1 * healthQueryService.getDailySummary(recordKey, date) >> Optional.of(summary)
 
         result.statusCode == HttpStatus.OK
         result.body.steps == 8000
@@ -135,10 +135,9 @@ class HealthControllerTest extends Specification {
                 healthController.getDailySummary(date, recordKey)
 
         then:
-        1 * healthQueryService.getDailySummary(recordKey, date) >> null
+        1 * healthQueryService.getDailySummary(recordKey, date) >> Optional.empty()
 
-        result.statusCode == HttpStatus.OK
-        result.body == null
+        result.statusCode == HttpStatus.NOT_FOUND
     }
 
     def "월별 집계 데이터 조회 API 테스트 - 전체 조회"() {
@@ -214,7 +213,7 @@ class HealthControllerTest extends Specification {
                 healthController.getMonthlySummary(year, month, recordKey)
 
         then:
-        1 * healthQueryService.getMonthlySummary(recordKey, year, month) >> summary
+        1 * healthQueryService.getMonthlySummary(recordKey, year, month) >> Optional.of(summary)
 
         result.statusCode == HttpStatus.OK
         result.body.year == 2024
@@ -233,9 +232,8 @@ class HealthControllerTest extends Specification {
                 healthController.getMonthlySummary(year, month, recordKey)
 
         then:
-        1 * healthQueryService.getMonthlySummary(recordKey, year, month) >> null
+        1 * healthQueryService.getMonthlySummary(recordKey, year, month) >> Optional.empty()
 
-        result.statusCode == HttpStatus.OK
-        result.body == null
+        result.statusCode == HttpStatus.NOT_FOUND
     }
 }

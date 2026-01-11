@@ -1,18 +1,26 @@
 package com.ocare.domain.health.dto.request;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class EntryDto {
+
+    @NotNull(message = "period는 필수입니다")
+    @Valid
     private PeriodDto period;
+
+    @Valid
     private ValueDto distance;
+
+    @Valid
     private ValueDto calories;
+
     private Object steps;
 
     public Integer getStepsAsInteger() {

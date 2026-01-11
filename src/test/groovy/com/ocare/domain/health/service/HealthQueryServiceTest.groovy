@@ -82,17 +82,17 @@ class HealthQueryServiceTest extends Specification {
         DailyHealthSummaryEntity entity = createDailyEntity(1L, recordKey, date, 8000, 350.0f, 6.0f)
 
         when:
-        DailySummaryResponse result = healthQueryService.getDailySummary(recordKey, date)
+        Optional<DailySummaryResponse> result = healthQueryService.getDailySummary(recordKey, date)
 
         then:
         1 * dailySummaryRepository.findByRecordKeyAndSummaryDate(recordKey, date) >> Optional.of(entity)
 
-        result != null
-        result.recordKey == recordKey
-        result.date == date
-        result.steps == 8000
-        result.calories == 350.0f
-        result.distance == 6.0f
+        result.isPresent()
+        result.get().recordKey == recordKey
+        result.get().date == date
+        result.get().steps == 8000
+        result.get().calories == 350.0f
+        result.get().distance == 6.0f
     }
 
     def "특정 일자 집계 데이터 조회 테스트 - 데이터 없음"() {
@@ -101,12 +101,12 @@ class HealthQueryServiceTest extends Specification {
         LocalDate date = LocalDate.of(2024, 12, 31)
 
         when:
-        DailySummaryResponse result = healthQueryService.getDailySummary(recordKey, date)
+        Optional<DailySummaryResponse> result = healthQueryService.getDailySummary(recordKey, date)
 
         then:
         1 * dailySummaryRepository.findByRecordKeyAndSummaryDate(recordKey, date) >> Optional.empty()
 
-        result == null
+        result.isEmpty()
     }
 
     def "월별 집계 데이터 전체 조회 테스트"() {
@@ -173,16 +173,16 @@ class HealthQueryServiceTest extends Specification {
         MonthlyHealthSummaryEntity entity = createMonthlyEntity(1L, recordKey, year, month, 160000, 6200.0f, 105.0f)
 
         when:
-        MonthlySummaryResponse result = healthQueryService.getMonthlySummary(recordKey, year, month)
+        Optional<MonthlySummaryResponse> result = healthQueryService.getMonthlySummary(recordKey, year, month)
 
         then:
         1 * monthlySummaryRepository.findByRecordKeyAndSummaryYearAndSummaryMonth(recordKey, year, month) >> Optional.of(entity)
 
-        result != null
-        result.recordKey == recordKey
-        result.year == 2024
-        result.month == 3
-        result.steps == 160000
+        result.isPresent()
+        result.get().recordKey == recordKey
+        result.get().year == 2024
+        result.get().month == 3
+        result.get().steps == 160000
     }
 
     def "특정 월 집계 데이터 조회 테스트 - 데이터 없음"() {
@@ -192,12 +192,12 @@ class HealthQueryServiceTest extends Specification {
         Integer month = 12
 
         when:
-        MonthlySummaryResponse result = healthQueryService.getMonthlySummary(recordKey, year, month)
+        Optional<MonthlySummaryResponse> result = healthQueryService.getMonthlySummary(recordKey, year, month)
 
         then:
         1 * monthlySummaryRepository.findByRecordKeyAndSummaryYearAndSummaryMonth(recordKey, year, month) >> Optional.empty()
 
-        result == null
+        result.isEmpty()
     }
 
     // Helper methods

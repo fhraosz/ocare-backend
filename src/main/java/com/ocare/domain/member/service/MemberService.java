@@ -48,7 +48,7 @@ public class MemberService {
     public LoginResponse login(LoginRequest request) {
         log.debug("로그인 요청: email={}", request.getEmail());
 
-        MemberEntity member = findByEmailOrThrow(request.getEmail());
+        MemberEntity member = findByEmailWithErrorCode(request.getEmail(), ErrorCode.MEMBER_PASSWORD_MISMATCH);
         validatePassword(request.getPassword(), member.getPassword(), request.getEmail());
 
         String accessToken = jwtTokenProvider.createToken(member.getEmail());
@@ -61,11 +61,7 @@ public class MemberService {
      * 이메일로 회원 조회
      */
     public MemberEntity findByEmail(String email) {
-        return memberRepository.findByEmail(email)
-                .orElseThrow(() -> {
-                    log.error("존재하지 않는 회원: email={}", email);
-                    return CustomException.of(ErrorCode.MEMBER_NOT_FOUND);
-                });
+        return findByEmailWithErrorCode(email, ErrorCode.MEMBER_NOT_FOUND);
     }
 
     /**
@@ -123,13 +119,13 @@ public class MemberService {
     }
 
     /**
-     * 이메일로 회원 조회 (로그인용 - 비밀번호 불일치 에러 반환)
+     * 이메일로 회원 조회 (에러 코드 지정)
      */
-    private MemberEntity findByEmailOrThrow(String email) {
+    private MemberEntity findByEmailWithErrorCode(String email, ErrorCode errorCode) {
         return memberRepository.findByEmail(email)
                 .orElseThrow(() -> {
                     log.error("존재하지 않는 회원: email={}", email);
-                    return CustomException.of(ErrorCode.MEMBER_PASSWORD_MISMATCH);
+                    return CustomException.of(errorCode);
                 });
     }
 

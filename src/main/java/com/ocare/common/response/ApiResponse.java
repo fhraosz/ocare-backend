@@ -54,13 +54,4 @@ public class ApiResponse<T> {
                 .message(message)
                 .build();
     }
-
-    @Deprecated
-    public static <T> ApiResponse<T> error(String message) {
-        return ApiResponse.<T>builder()
-                .success(false)
-                .errorCode("COMMON_002")
-                .message(message)
-                .build();
-    }
 }

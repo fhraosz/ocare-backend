@@ -29,26 +29,6 @@ public class CustomException extends RuntimeException {
         return new CustomException(errorCode, customMessage);
     }
 
-    @Deprecated
-    public static CustomException badRequest(String message) {
-        return new CustomException(ErrorCode.INVALID_INPUT, message);
-    }
-
-    @Deprecated
-    public static CustomException notFound(String message) {
-        return new CustomException(ErrorCode.MEMBER_NOT_FOUND, message);
-    }
-
-    @Deprecated
-    public static CustomException unauthorized(String message) {
-        return new CustomException(ErrorCode.AUTH_UNAUTHORIZED, message);
-    }
-
-    @Deprecated
-    public static CustomException conflict(String message) {
-        return new CustomException(ErrorCode.MEMBER_EMAIL_DUPLICATE, message);
-    }
-
     public String getCode() {
         return errorCode.getCode();
     }
